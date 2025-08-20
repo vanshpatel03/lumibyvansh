@@ -51,8 +51,8 @@ export function PersonaSelection({ onSelectPersona, onCustomSubmit }: PersonaSel
 
   return (
     <div className="flex flex-col items-center justify-center min-h-screen bg-background text-foreground font-body">
-      <header className="absolute top-0 w-full py-4 text-center text-sm text-muted-foreground">
-        powered by vansh rabadiya
+      <header className="absolute top-0 w-full py-4 text-center text-base text-muted-foreground">
+        made by vansh rabadiya
       </header>
       <main className="flex-1 flex items-center justify-center w-full">
         <Card className="w-full max-w-2xl mx-4 border-0 md:border md:bg-card/50 shadow-2xl">
@@ -99,8 +99,8 @@ export function PersonaSelection({ onSelectPersona, onCustomSubmit }: PersonaSel
           )}
         </Card>
       </main>
-       <footer className="py-4 text-center text-sm text-muted-foreground">
-        powered by vansh rabadiya
+       <footer className="py-4 text-center text-base text-muted-foreground">
+        made by vansh rabadiya
       </footer>
     </div>
   );
