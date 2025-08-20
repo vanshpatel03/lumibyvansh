@@ -50,50 +50,55 @@ export function PersonaSelection({ onSelectPersona, onCustomSubmit }: PersonaSel
   }
 
   return (
-    <div className="flex items-center justify-center min-h-screen bg-background text-foreground font-body">
-      <Card className="w-full max-w-2xl mx-4 border-0 md:border md:bg-card/50 shadow-2xl">
-        <CardHeader className="text-center">
-          <CardTitle className="text-4xl md:text-5xl font-bold font-headline tracking-tight">Welcome to LUMI</CardTitle>
-          <CardDescription className="text-lg md:text-xl">Choose your companion</CardDescription>
-        </CardHeader>
-        <CardContent>
-          {!showCustomInput ? (
-            <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
-              {[...personas, 'Custom'].map((p) => (
-                <Button
-                  key={p}
-                  variant={selected === p ? 'default' : 'outline'}
-                  className={cn(
-                    "w-full h-24 text-lg font-semibold transition-all duration-300 transform hover:scale-105",
-                    selected === p ? 'bg-primary text-primary-foreground ring-2 ring-primary ring-offset-2' : ''
-                  )}
-                  onClick={() => handleSelect(p)}
-                >
-                  {p}
-                </Button>
-              ))}
-            </div>
-          ) : (
-             <div className="space-y-4 flex flex-col items-center">
-                <h3 className="text-2xl font-headline">Define Your Custom Persona</h3>
-                <Textarea
-                    id="custom-persona-input"
-                    placeholder="e.g., A witty space pirate with a heart of gold..."
-                    value={customPersona}
-                    onChange={(e) => setCustomPersona(e.target.value)}
-                    rows={5}
-                    className="bg-background max-w-md w-full"
-                />
-            </div>
+    <div className="flex flex-col items-center justify-center min-h-screen bg-background text-foreground font-body">
+      <main className="flex-1 flex items-center justify-center w-full">
+        <Card className="w-full max-w-2xl mx-4 border-0 md:border md:bg-card/50 shadow-2xl">
+          <CardHeader className="text-center">
+            <CardTitle className="text-4xl md:text-5xl font-bold font-headline tracking-tight">Welcome to LUMI</CardTitle>
+            <CardDescription className="text-lg md:text-xl">Choose your companion</CardDescription>
+          </CardHeader>
+          <CardContent>
+            {!showCustomInput ? (
+              <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
+                {[...personas, 'Custom'].map((p) => (
+                  <Button
+                    key={p}
+                    variant={selected === p ? 'default' : 'outline'}
+                    className={cn(
+                      "w-full h-24 text-lg font-semibold transition-all duration-300 transform hover:scale-105",
+                      selected === p ? 'bg-primary text-primary-foreground ring-2 ring-primary ring-offset-2' : ''
+                    )}
+                    onClick={() => handleSelect(p)}
+                  >
+                    {p}
+                  </Button>
+                ))}
+              </div>
+            ) : (
+              <div className="space-y-4 flex flex-col items-center">
+                  <h3 className="text-2xl font-headline">Define Your Custom Persona</h3>
+                  <Textarea
+                      id="custom-persona-input"
+                      placeholder="e.g., A witty space pirate with a heart of gold..."
+                      value={customPersona}
+                      onChange={(e) => setCustomPersona(e.target.value)}
+                      rows={5}
+                      className="bg-background max-w-md w-full"
+                  />
+              </div>
+            )}
+          </CardContent>
+          {showCustomInput && (
+              <CardFooter className="flex flex-col gap-4">
+                  <Button onClick={handleCustomSubmit} disabled={!customPersona.trim()} className="w-full max-w-xs">Start Chatting</Button>
+                  <Button variant="ghost" onClick={() => setShowCustomInput(false)}>Back to presets</Button>
+              </CardFooter>
           )}
-        </CardContent>
-        {showCustomInput && (
-            <CardFooter className="flex flex-col gap-4">
-                <Button onClick={handleCustomSubmit} disabled={!customPersona.trim()} className="w-full max-w-xs">Start Chatting</Button>
-                <Button variant="ghost" onClick={() => setShowCustomInput(false)}>Back to presets</Button>
-            </CardFooter>
-        )}
-      </Card>
+        </Card>
+      </main>
+       <footer className="py-4 text-center text-sm text-muted-foreground">
+        powered by vansh rabadiya
+      </footer>
     </div>
   );
 }

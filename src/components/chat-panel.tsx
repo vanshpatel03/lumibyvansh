@@ -138,6 +138,9 @@ export function ChatPanel({
             <span className="sr-only">Send</span>
           </Button>
         </form>
+         <footer className="pt-2 text-center text-xs text-muted-foreground">
+          powered by vansh rabadiya
+        </footer>
       </div>
     </div>
   );
