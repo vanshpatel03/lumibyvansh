@@ -1,3 +1,4 @@
+
 import {
   Card,
   CardContent,
@@ -40,7 +41,7 @@ export function LumiSidebar({
   setCustomPersona,
 }: LumiSidebarProps) {
   return (
-    <aside className="w-full md:w-80 lg:w-96 p-4">
+    <aside className="w-full md:w-80 lg:w-96 p-4 hidden md:block">
       <Card className="h-full border-0 md:border md:bg-card/50">
         <CardHeader>
           <CardTitle className="text-3xl font-bold font-headline tracking-tight">LUMI</CardTitle>

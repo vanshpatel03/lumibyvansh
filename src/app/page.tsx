@@ -1,10 +1,11 @@
+
 'use client';
 
 import { useState, useEffect } from 'react';
-import { LumiSidebar } from '@/components/lumi-sidebar';
 import { ChatPanel } from '@/components/chat-panel';
 import { getLumiResponse, getExpressiveSuggestions } from './actions';
 import { useToast } from "@/hooks/use-toast";
+import { PersonaSelection } from '@/components/persona-selection';
 
 export type Message = {
   role: 'user' | 'LUMI';
@@ -13,26 +14,27 @@ export type Message = {
 
 export default function Home() {
   const { toast } = useToast();
-  const [persona, setPersona] = useState('Girlfriend');
+  const [persona, setPersona] = useState('');
   const [customPersona, setCustomPersona] = useState('');
   const [messages, setMessages] = useState<Message[]>([]);
   const [isLoading, setIsLoading] = useState(false);
   const [emojiSuggestions, setEmojiSuggestions] = useState<string[]>([]);
+  const [personaSelected, setPersonaSelected] = useState(false);
 
   useEffect(() => {
-    const storedMessages = localStorage.getItem('lumiMessages');
+    const storedMessages = localStorage.getItem(`lumiMessages_${persona}`);
     if (storedMessages) {
       setMessages(JSON.parse(storedMessages));
     } else {
         setMessages([{ role: 'LUMI', content: "Hey... I'm Lumi. How are you feeling right now?" }]);
     }
-  }, []);
+  }, [persona]);
 
   useEffect(() => {
-    if (messages.length > 0) {
-      localStorage.setItem('lumiMessages', JSON.stringify(messages));
+    if (messages.length > 0 && persona) {
+      localStorage.setItem(`lumiMessages_${persona}`, JSON.stringify(messages));
     }
-  }, [messages]);
+  }, [messages, persona]);
 
   const handleSendMessage = async (userInput: string) => {
     setIsLoading(true);
@@ -51,10 +53,14 @@ export default function Home() {
       const lumiMessage = { role: 'LUMI', content: lumiResult.response };
       setMessages(prev => [...prev, lumiMessage]);
 
-      const suggestionsResult = await getExpressiveSuggestions(lumiResult.response);
-      if (suggestionsResult.emojiSuggestions) {
-          setEmojiSuggestions(suggestionsResult.emojiSuggestions);
+      // Don't call for emoji suggestions if the response is the default error message
+      if (lumiResult.response !== "Oh, my heart... I'm feeling a little overwhelmed right now. Can we talk about something else?") {
+        const suggestionsResult = await getExpressiveSuggestions(lumiResult.response);
+        if (suggestionsResult.emojiSuggestions) {
+            setEmojiSuggestions(suggestionsResult.emojiSuggestions);
+        }
       }
+
     } catch (error) {
       console.error("Failed to get response:", error);
       toast({
@@ -69,21 +75,34 @@ export default function Home() {
     }
   };
 
+  const handlePersonaSelection = (selectedPersona: string) => {
+    setPersona(selectedPersona);
+    setPersonaSelected(true);
+  };
 
-  return (
-    <div className="flex flex-col md:flex-row h-screen max-h-screen bg-background text-foreground font-body overflow-hidden">
-      <LumiSidebar
-        persona={persona}
-        setPersona={setPersona}
+  if (!personaSelected) {
+    return (
+      <PersonaSelection 
+        onSelectPersona={handlePersonaSelection} 
         customPersona={customPersona}
         setCustomPersona={setCustomPersona}
       />
+    );
+  }
+
+  return (
+    <div className="flex h-screen max-h-screen bg-background text-foreground font-body overflow-hidden">
       <main className="flex-1 flex flex-col h-full">
         <ChatPanel
           messages={messages}
           isLoading={isLoading}
           emojiSuggestions={emojiSuggestions}
           sendMessage={handleSendMessage}
+          persona={persona}
+          onBack={() => {
+            setPersonaSelected(false);
+            setMessages([{ role: 'LUMI', content: "Hey... I'm Lumi. How are you feeling right now?" }]);
+          }}
         />
       </main>
     </div>

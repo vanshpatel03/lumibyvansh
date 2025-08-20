@@ -1,8 +1,9 @@
+
 import { useState, useRef, useEffect, type FormEvent } from 'react';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { Textarea } from '@/components/ui/textarea';
 import { Button } from '@/components/ui/button';
-import { SendHorizonal, BrainCircuit } from 'lucide-react';
+import { SendHorizonal, BrainCircuit, ArrowLeft } from 'lucide-react';
 import { ChatMessage } from './chat-message';
 import { EmojiSuggestions } from './emoji-suggestions';
 import type { Message } from '@/app/page';
@@ -12,6 +13,8 @@ type ChatPanelProps = {
   isLoading: boolean;
   emojiSuggestions: string[];
   sendMessage: (message: string) => Promise<void>;
+  persona: string;
+  onBack: () => void;
 };
 
 export function ChatPanel({
@@ -19,6 +22,8 @@ export function ChatPanel({
   isLoading,
   emojiSuggestions,
   sendMessage,
+  persona,
+  onBack,
 }: ChatPanelProps) {
   const [input, setInput] = useState('');
   const scrollAreaRef = useRef<HTMLDivElement>(null);
@@ -51,7 +56,18 @@ export function ChatPanel({
   };
 
   return (
-    <div className="flex flex-col h-full bg-background rounded-l-2xl md:border-l">
+    <div className="flex flex-col h-full bg-background rounded-l-2xl">
+      <header className="p-4 border-b flex items-center justify-between">
+          <div className="flex items-center gap-4">
+            <Button variant="ghost" size="icon" onClick={onBack}>
+              <ArrowLeft />
+            </Button>
+            <div>
+              <h2 className="text-xl font-bold font-headline">{persona}</h2>
+              <p className="text-sm text-muted-foreground">Online</p>
+            </div>
+          </div>
+      </header>
       <ScrollArea className="flex-1 p-4" ref={scrollAreaRef}>
         <div className="space-y-6">
           {messages.map((msg, index) => (
