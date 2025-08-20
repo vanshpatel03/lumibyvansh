@@ -7,6 +7,20 @@ import { SendHorizonal, BrainCircuit, ArrowLeft } from 'lucide-react';
 import { ChatMessage } from './chat-message';
 import { EmojiSuggestions } from './emoji-suggestions';
 import type { Message } from '@/app/page';
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select"
+
+const models = [
+  'Vansh Meta',
+  'Vansh Prime',
+  'Vansh Ultra',
+  'Vansh Phantom',
+];
 
 type ChatPanelProps = {
   messages: Message[];
@@ -16,6 +30,7 @@ type ChatPanelProps = {
   persona: string;
   model: string;
   onBack: () => void;
+  onModelChange: (model: string) => void;
 };
 
 export function ChatPanel({
@@ -26,6 +41,7 @@ export function ChatPanel({
   persona,
   model,
   onBack,
+  onModelChange,
 }: ChatPanelProps) {
   const [input, setInput] = useState('');
   const scrollAreaRef = useRef<HTMLDivElement>(null);
@@ -97,6 +113,18 @@ export function ChatPanel({
             className="flex-1 resize-none bg-muted focus-visible:ring-1 focus-visible:ring-ring"
             disabled={isLoading}
           />
+           <Select value={model} onValueChange={onModelChange} disabled={isLoading}>
+            <SelectTrigger className="w-auto sm:w-[150px] shrink-0">
+              <SelectValue placeholder="Select Model" />
+            </SelectTrigger>
+            <SelectContent>
+              {models.map((modelName) => (
+                <SelectItem key={modelName} value={modelName}>
+                  {modelName}
+                </SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
           <Button
             type="submit"
             size="icon"

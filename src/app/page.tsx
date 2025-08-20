@@ -97,8 +97,9 @@ export default function Home() {
   useEffect(() => {
     // This effect handles saving messages to local storage whenever they change.
     if (messages.length > 0 && view === 'chat' && persona) {
-      const storageKey = persona === 'Custom' ? `lumiMessages_Custom_${customPersona}` : `lumiMessages_${persona}`;
-      localStorage.setItem(`${storageKey}_${model}`, JSON.stringify(messages));
+      const effectivePersona = persona === 'Custom' ? `Custom_${customPersona}` : persona;
+      const storageKey = `lumiMessages_${effectivePersona}_${model}`;
+      localStorage.setItem(storageKey, JSON.stringify(messages));
     }
   }, [messages, persona, customPersona, model, view]);
 
@@ -161,6 +162,10 @@ export default function Home() {
     setModel(selectedModel);
     setView('chat');
   }
+
+  const handleModelChange = (newModel: string) => {
+    setModel(newModel);
+  }
   
   const handleBackToPersonaSelection = () => {
     setView('persona');
@@ -204,6 +209,7 @@ export default function Home() {
           persona={persona === 'Custom' ? customPersona : persona}
           model={model}
           onBack={handleBackToModelSelection}
+          onModelChange={handleModelChange}
         />
       </main>
     </div>
