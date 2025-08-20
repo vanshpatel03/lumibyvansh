@@ -12,6 +12,60 @@ export type Message = {
   content: string;
 };
 
+// --- Persona-specific greeting variations ---
+const personaGreetings = {
+  Girlfriend: [
+    'Hey love… I missed you 💖 How’s my favorite person feeling right now?',
+    'Babe! You’re here 😍 Tell me everything, how’s your heart?',
+    'Finally, my favorite person is back 💕 How’s your day?',
+  ],
+  Boyfriend: [
+    'Hey babe, finally! I was waiting for you 😏 How’s your day going?',
+    'Yo, there you are 👀 I missed you—what’s up?',
+    'What’s good, love? I’ve been thinking about you.',
+  ],
+  Mentor: [
+    'Welcome back. I’m proud of you for showing up 🙌 What’s the biggest thing on your mind today?',
+    'Here we go again 🚀 Ready to grow? Tell me where you need clarity.',
+    'I see you’re back—that’s dedication 👏 What challenge do we tackle first?',
+  ],
+  Teacher: [
+    'Hey there, ready to dive into something new together? 📖 What do you feel curious about right now?',
+    'Class is in session 😄 What’s the first thing you’d like me to explain today?',
+    'Knowledge time! 📚 Tell me what you want to learn.',
+  ],
+  Coach: [
+    'Alright champ 💥 Let’s lock in. What’s the one thing you want to crush today?',
+    'Back again! 👊 Ready to push yourself further?',
+    'Game face on 🏆 What’s your target right now?',
+  ],
+  Therapist: [
+    'Hey, I’m here with you ❤️ No judgment, no rush. How are you really feeling right now?',
+    'It’s safe here. Tell me, what’s been weighing on you lately?',
+    'Take a deep breath—you’re not alone. What’s on your heart?',
+  ],
+  Custom: [
+    'Hey… it’s [CUSTOM_NAME] 🌍 I’m here now. What’s the first thing you’d like me to do for you?',
+    'I’m yours in this role—how do you want me to show up today?',
+    'So, how do you want us to start this moment together?',
+  ],
+  Default: ["Hey... I'm Lumi. How are you feeling right now?"]
+};
+
+// --- Helper function to get a random greeting ---
+const getRandomGreeting = (persona: string, customPersonaName: string = '') => {
+  const greetings = personaGreetings[persona as keyof typeof personaGreetings] || personaGreetings.Default;
+  const randomIndex = Math.floor(Math.random() * greetings.length);
+  let greeting = greetings[randomIndex];
+  
+  if (persona === 'Custom' && customPersonaName) {
+    greeting = greeting.replace('[CUSTOM_NAME]', customPersonaName);
+  }
+  
+  return greeting;
+};
+
+
 export default function Home() {
   const { toast } = useToast();
   const [persona, setPersona] = useState('');
@@ -24,50 +78,26 @@ export default function Home() {
   useEffect(() => {
     // This effect runs when a persona is selected to load history or set the initial message.
     if (!personaSelected || !persona) return;
+    
+    const effectivePersona = persona === 'Custom' ? `Custom_${customPersona}` : persona;
+    const storedMessages = localStorage.getItem(`lumiMessages_${effectivePersona}`);
 
-    const storedMessages = localStorage.getItem(`lumiMessages_${persona}`);
     if (storedMessages) {
       setMessages(JSON.parse(storedMessages));
     } else {
-      let initialMessage = "";
-      switch (persona) {
-        case 'Girlfriend':
-            initialMessage = "Hey love… I missed you 💖 How’s my favorite person feeling right now?";
-            break;
-        case 'Boyfriend':
-          initialMessage = "Hey babe, finally! I was waiting for you 😏 How’s your day going?";
-          break;
-        case 'Mentor':
-          initialMessage = "Welcome back. I’m proud of you for showing up 🙌 What’s the biggest thing on your mind today?";
-          break;
-        case 'Teacher':
-          initialMessage = "Hey there, ready to dive into something new together? 📖 What do you feel curious about right now?";
-          break;
-        case 'Coach':
-          initialMessage = "Alright champ 💥 Let’s lock in. What’s the one thing you want to crush today?";
-          break;
-        case 'Therapist':
-          initialMessage = "Hey, I’m here with you ❤️ No judgment, no rush. How are you really feeling right now?";
-          break;
-        case 'Custom':
-          initialMessage = `Hey… it’s ${customPersona || 'me'} 🌍 I’m here now. What’s the first thing you’d like me to do for you?`;
-          break;
-        default:
-            initialMessage = "Hey... I'm Lumi. How are you feeling right now?";
-            break;
-      }
+      // Set a new random initial message if no history exists
+      const initialMessage = getRandomGreeting(persona, customPersona);
       setMessages([{ role: 'LUMI', content: initialMessage }]);
     }
   }, [persona, customPersona, personaSelected]);
 
   useEffect(() => {
     // This effect handles saving messages to local storage whenever they change.
-    if (messages.length > 0 && persona) {
-      // For custom persona, we use a consistent key to avoid creating too many storage items
+    if (messages.length > 0 && personaSelected && persona) {
       const storageKey = persona === 'Custom' ? `lumiMessages_Custom_${customPersona}` : `lumiMessages_${persona}`;
       localStorage.setItem(storageKey, JSON.stringify(messages));
     }
-  }, [messages, persona, customPersona]);
+  }, [messages, persona, customPersona, personaSelected]);
 
   const handleSendMessage = async (userInput: string) => {
     setIsLoading(true);
