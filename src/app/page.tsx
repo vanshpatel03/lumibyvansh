@@ -6,7 +6,6 @@ import { ChatPanel } from '@/components/chat-panel';
 import { getLumiResponse, getExpressiveSuggestions } from './actions';
 import { useToast } from "@/hooks/use-toast";
 import { PersonaSelection } from '@/components/persona-selection';
-import { ModelSelection } from '@/components/model-selection';
 
 export type Message = {
   role: 'user' | 'LUMI';
@@ -75,14 +74,15 @@ export default function Home() {
   const [messages, setMessages] = useState<Message[]>([]);
   const [isLoading, setIsLoading] = useState(false);
   const [emojiSuggestions, setEmojiSuggestions] = useState<string[]>([]);
-  const [view, setView] = useState<'persona' | 'model' | 'chat'>('persona');
+  const [view, setView] = useState<'persona' | 'chat'>('persona');
 
   useEffect(() => {
-    // This effect runs when a model is selected to load history or set the initial message.
+    // This effect runs when the chat view becomes active to load history or set the initial message.
     if (view !== 'chat' || !persona) return;
     
     const effectivePersona = persona === 'Custom' ? `Custom_${customPersona}` : persona;
-    const storageKey = `lumiMessages_${effectivePersona}_${model}`;
+    // We will now key storage by persona only, model can be changed in-chat
+    const storageKey = `lumiMessages_${effectivePersona}`;
     const storedMessages = localStorage.getItem(storageKey);
 
     if (storedMessages) {
@@ -92,16 +92,16 @@ export default function Home() {
       const initialMessage = getRandomGreeting(persona, customPersona);
       setMessages([{ role: 'LUMI', content: initialMessage }]);
     }
-  }, [view, persona, customPersona, model]);
+  }, [view, persona, customPersona]);
 
   useEffect(() => {
     // This effect handles saving messages to local storage whenever they change.
     if (messages.length > 0 && view === 'chat' && persona) {
       const effectivePersona = persona === 'Custom' ? `Custom_${customPersona}` : persona;
-      const storageKey = `lumiMessages_${effectivePersona}_${model}`;
+      const storageKey = `lumiMessages_${effectivePersona}`;
       localStorage.setItem(storageKey, JSON.stringify(messages));
     }
-  }, [messages, persona, customPersona, model, view]);
+  }, [messages, persona, customPersona, view]);
 
   const handleSendMessage = async (userInput: string) => {
     setIsLoading(true);
@@ -148,22 +148,21 @@ export default function Home() {
     }
     setPersona(selectedPersona);
     setMessages([]); // Clear previous messages
-    setView('model');
+    setModel('Vansh Meta'); // Default to Vansh Meta
+    setView('chat'); // Go directly to chat
   };
   
   const handleCustomPersonaSubmit = (customPersonaName: string) => {
       setCustomPersona(customPersonaName);
       setPersona('Custom');
       setMessages([]); // Clear previous messages
-      setView('model');
-  }
-
-  const handleModelSelect = (selectedModel: string) => {
-    setModel(selectedModel);
-    setView('chat');
+      setModel('Vansh Meta'); // Default to Vansh Meta
+      setView('chat'); // Go directly to chat
   }
 
   const handleModelChange = (newModel: string) => {
+    // When the model is changed in the chat view, we just update the state.
+    // We could add a system message here if desired, e.g. "Lumi's intelligence has been updated to Vansh Prime."
     setModel(newModel);
   }
   
@@ -171,11 +170,6 @@ export default function Home() {
     setView('persona');
     setPersona('');
     setCustomPersona('');
-    setMessages([]);
-  }
-
-  const handleBackToModelSelection = () => {
-    setView('model');
     setMessages([]);
   }
 
@@ -188,16 +182,6 @@ export default function Home() {
     );
   }
 
-  if (view === 'model') {
-    return (
-      <ModelSelection 
-        onSelectModel={handleModelSelect}
-        onBack={handleBackToPersonaSelection}
-        persona={persona === 'Custom' ? customPersona : persona}
-      />
-    )
-  }
-
   return (
     <div className="flex h-screen max-h-screen bg-background text-foreground font-body overflow-hidden">
       <main className="flex-1 flex flex-col h-full">
@@ -208,7 +192,7 @@ export default function Home() {
           sendMessage={handleSendMessage}
           persona={persona === 'Custom' ? customPersona : persona}
           model={model}
-          onBack={handleBackToModelSelection}
+          onBack={handleBackToPersonaSelection}
           onModelChange={handleModelChange}
         />
       </main>
