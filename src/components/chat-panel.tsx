@@ -48,10 +48,13 @@ export function ChatPanel({
 
   useEffect(() => {
     if (scrollAreaRef.current) {
-      scrollAreaRef.current.scrollTo({
-        top: scrollAreaRef.current.scrollHeight,
-        behavior: 'smooth',
-      });
+      const viewport = scrollAreaRef.current.querySelector('div[data-radix-scroll-area-viewport]');
+      if (viewport) {
+        viewport.scrollTo({
+          top: viewport.scrollHeight,
+          behavior: 'smooth',
+        });
+      }
     }
   }, [messages]);
 
@@ -74,8 +77,8 @@ export function ChatPanel({
   };
 
   return (
-    <div className="flex flex-col h-full bg-background rounded-l-2xl">
-      <header className="p-4 border-b flex items-center justify-between">
+    <div className="flex flex-col h-full bg-background">
+      <header className="p-4 border-b flex items-center justify-between shrink-0">
           <div className="flex items-center gap-4">
             <Button variant="ghost" size="icon" onClick={onBack}>
               <ArrowLeft />
@@ -86,8 +89,8 @@ export function ChatPanel({
             </div>
           </div>
       </header>
-      <ScrollArea className="flex-1 p-4" ref={scrollAreaRef}>
-        <div className="space-y-6">
+      <ScrollArea className="flex-1" ref={scrollAreaRef}>
+        <div className="space-y-6 p-4">
           {messages.map((msg, index) => (
             <ChatMessage key={index} message={msg} />
           ))}
@@ -101,7 +104,7 @@ export function ChatPanel({
           )}
         </div>
       </ScrollArea>
-      <div className="p-4 border-t bg-card/50">
+      <div className="p-4 border-t bg-card/50 shrink-0">
         <EmojiSuggestions emojis={emojiSuggestions} onSelect={handleEmojiSelect} />
         <form onSubmit={handleSubmit} className="flex items-center gap-2">
           <Textarea

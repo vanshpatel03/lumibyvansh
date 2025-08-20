@@ -183,8 +183,7 @@ export default function Home() {
   }
 
   return (
-    <div className="flex h-screen max-h-screen bg-background text-foreground font-body overflow-hidden">
-      <main className="flex-1 flex flex-col h-full">
+    <div className="h-screen w-screen flex flex-col bg-background text-foreground font-body">
         <ChatPanel
           messages={messages}
           isLoading={isLoading}
@@ -195,7 +194,6 @@ export default function Home() {
           onBack={handleBackToPersonaSelection}
           onModelChange={handleModelChange}
         />
-      </main>
     </div>
   );
 }
