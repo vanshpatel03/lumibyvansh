@@ -99,8 +99,8 @@ export function PersonaSelection({ onSelectPersona, onCustomSubmit }: PersonaSel
           )}
         </Card>
       </main>
-       <footer className="py-4 text-center text-base text-muted-foreground">
-        made by vansh rabadiya
+       <footer className="py-4 text-center text-sm font-semibold tracking-wider text-foreground/80">
+        Vision by Vansh Rabadiya
       </footer>
     </div>
   );
