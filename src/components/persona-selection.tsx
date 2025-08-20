@@ -24,13 +24,13 @@ const personas = [
 
 type PersonaSelectionProps = {
   onSelectPersona: (persona: string) => void;
-  customPersona: string;
-  setCustomPersona: (persona: string) => void;
+  onCustomSubmit: (persona: string) => void;
 };
 
-export function PersonaSelection({ onSelectPersona, customPersona, setCustomPersona }: PersonaSelectionProps) {
+export function PersonaSelection({ onSelectPersona, onCustomSubmit }: PersonaSelectionProps) {
   const [selected, setSelected] = useState('');
   const [showCustomInput, setShowCustomInput] = useState(false);
+  const [customPersona, setCustomPersona] = useState('');
 
   const handleSelect = (persona: string) => {
     if (persona === 'Custom') {
@@ -45,7 +45,7 @@ export function PersonaSelection({ onSelectPersona, customPersona, setCustomPers
   
   const handleCustomSubmit = () => {
     if (customPersona.trim()) {
-      onSelectPersona(customPersona);
+      onCustomSubmit(customPersona.trim());
     }
   }
 
