@@ -26,7 +26,7 @@ export default function Home() {
     if (storedMessages) {
       setMessages(JSON.parse(storedMessages));
     } else {
-        setMessages([{ role: 'LUMI', content: "Hey... I'm Lumi. How are you feeling right now?" }]);
+        setMessages([{ role: 'LUMI', content: "Hey love… I’ve been waiting for you 💕 How’s my favorite person feeling today?" }]);
     }
   }, [persona]);
 
@@ -101,7 +101,7 @@ export default function Home() {
           persona={persona}
           onBack={() => {
             setPersonaSelected(false);
-            setMessages([{ role: 'LUMI', content: "Hey... I'm Lumi. How are you feeling right now?" }]);
+            setMessages([{ role: 'LUMI', content: "Hey love… I’ve been waiting for you 💕 How’s my favorite person feeling today?" }]);
           }}
         />
       </main>
