@@ -14,6 +14,7 @@ type ChatPanelProps = {
   emojiSuggestions: string[];
   sendMessage: (message: string) => Promise<void>;
   persona: string;
+  model: string;
   onBack: () => void;
 };
 
@@ -23,6 +24,7 @@ export function ChatPanel({
   emojiSuggestions,
   sendMessage,
   persona,
+  model,
   onBack,
 }: ChatPanelProps) {
   const [input, setInput] = useState('');
@@ -64,7 +66,7 @@ export function ChatPanel({
             </Button>
             <div>
               <h2 className="text-xl font-bold font-headline">{persona}</h2>
-              <p className="text-sm text-muted-foreground">Online</p>
+              <p className="text-sm text-muted-foreground">Chatting with {model}</p>
             </div>
           </div>
       </header>

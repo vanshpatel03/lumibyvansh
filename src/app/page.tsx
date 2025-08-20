@@ -6,6 +6,7 @@ import { ChatPanel } from '@/components/chat-panel';
 import { getLumiResponse, getExpressiveSuggestions } from './actions';
 import { useToast } from "@/hooks/use-toast";
 import { PersonaSelection } from '@/components/persona-selection';
+import { ModelSelection } from '@/components/model-selection';
 
 export type Message = {
   role: 'user' | 'LUMI';
@@ -68,19 +69,21 @@ const getRandomGreeting = (persona: string, customPersonaName: string = '') => {
 
 export default function Home() {
   const { toast } = useToast();
+  const [model, setModel] = useState('Vansh Meta');
   const [persona, setPersona] = useState('');
   const [customPersona, setCustomPersona] = useState('');
   const [messages, setMessages] = useState<Message[]>([]);
   const [isLoading, setIsLoading] = useState(false);
   const [emojiSuggestions, setEmojiSuggestions] = useState<string[]>([]);
-  const [personaSelected, setPersonaSelected] = useState(false);
+  const [view, setView] = useState<'persona' | 'model' | 'chat'>('persona');
 
   useEffect(() => {
-    // This effect runs when a persona is selected to load history or set the initial message.
-    if (!personaSelected || !persona) return;
+    // This effect runs when a model is selected to load history or set the initial message.
+    if (view !== 'chat' || !persona) return;
     
     const effectivePersona = persona === 'Custom' ? `Custom_${customPersona}` : persona;
-    const storedMessages = localStorage.getItem(`lumiMessages_${effectivePersona}`);
+    const storageKey = `lumiMessages_${effectivePersona}_${model}`;
+    const storedMessages = localStorage.getItem(storageKey);
 
     if (storedMessages) {
       setMessages(JSON.parse(storedMessages));
@@ -89,15 +92,15 @@ export default function Home() {
       const initialMessage = getRandomGreeting(persona, customPersona);
       setMessages([{ role: 'LUMI', content: initialMessage }]);
     }
-  }, [persona, customPersona, personaSelected]);
+  }, [view, persona, customPersona, model]);
 
   useEffect(() => {
     // This effect handles saving messages to local storage whenever they change.
-    if (messages.length > 0 && personaSelected && persona) {
+    if (messages.length > 0 && view === 'chat' && persona) {
       const storageKey = persona === 'Custom' ? `lumiMessages_Custom_${customPersona}` : `lumiMessages_${persona}`;
-      localStorage.setItem(storageKey, JSON.stringify(messages));
+      localStorage.setItem(`${storageKey}_${model}`, JSON.stringify(messages));
     }
-  }, [messages, persona, customPersona, personaSelected]);
+  }, [messages, persona, customPersona, model, view]);
 
   const handleSendMessage = async (userInput: string) => {
     setIsLoading(true);
@@ -111,7 +114,7 @@ export default function Home() {
       
       const effectivePersona = persona === 'Custom' ? customPersona : persona;
 
-      const lumiResult = await getLumiResponse(effectivePersona, storyMemory, userInput);
+      const lumiResult = await getLumiResponse(effectivePersona, storyMemory, userInput, model);
       
       const lumiMessage = { role: 'LUMI', content: lumiResult.response };
       setMessages(prev => [...prev, lumiMessage]);
@@ -144,30 +147,50 @@ export default function Home() {
     }
     setPersona(selectedPersona);
     setMessages([]); // Clear previous messages
-    setPersonaSelected(true);
+    setView('model');
   };
   
   const handleCustomPersonaSubmit = (customPersonaName: string) => {
       setCustomPersona(customPersonaName);
       setPersona('Custom');
       setMessages([]); // Clear previous messages
-      setPersonaSelected(true);
+      setView('model');
+  }
+
+  const handleModelSelect = (selectedModel: string) => {
+    setModel(selectedModel);
+    setView('chat');
   }
   
-  const handleBackToSelection = () => {
-    setPersonaSelected(false);
+  const handleBackToPersonaSelection = () => {
+    setView('persona');
     setPersona('');
     setCustomPersona('');
     setMessages([]);
   }
 
-  if (!personaSelected) {
+  const handleBackToModelSelection = () => {
+    setView('model');
+    setMessages([]);
+  }
+
+  if (view === 'persona') {
     return (
       <PersonaSelection 
         onSelectPersona={handlePersonaSelection} 
         onCustomSubmit={handleCustomPersonaSubmit}
       />
     );
+  }
+
+  if (view === 'model') {
+    return (
+      <ModelSelection 
+        onSelectModel={handleModelSelect}
+        onBack={handleBackToPersonaSelection}
+        persona={persona === 'Custom' ? customPersona : persona}
+      />
+    )
   }
 
   return (
@@ -179,7 +202,8 @@ export default function Home() {
           emojiSuggestions={emojiSuggestions}
           sendMessage={handleSendMessage}
           persona={persona === 'Custom' ? customPersona : persona}
-          onBack={handleBackToSelection}
+          model={model}
+          onBack={handleBackToModelSelection}
         />
       </main>
     </div>

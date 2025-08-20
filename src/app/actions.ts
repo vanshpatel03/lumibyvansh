@@ -7,13 +7,15 @@ import { generateExpressiveSuggestions } from '@/ai/flows/expressive-ui';
 export async function getLumiResponse(
   persona: string,
   storyMemory: string,
-  userInput: string
+  userInput: string,
+  model: string
 ) {
   try {
     const result = await adaptPersona({
       mode: persona,
       userInput,
       storyMemory,
+      model,
     });
     return result;
   } catch (error) {
