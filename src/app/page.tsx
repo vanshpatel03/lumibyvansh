@@ -26,7 +26,11 @@ export default function Home() {
     if (storedMessages) {
       setMessages(JSON.parse(storedMessages));
     } else {
-        setMessages([{ role: 'LUMI', content: "Hey love… I’ve been waiting for you 💕 How’s my favorite person feeling today?" }]);
+        let initialMessage = "Hey love… I’ve been waiting for you 💕 How’s my favorite person feeling today?";
+        if (persona === 'Boyfriend') {
+          initialMessage = "Hey babe, you’re finally here 😎 I missed you. How’s your day going so far?";
+        }
+        setMessages([{ role: 'LUMI', content: initialMessage }]);
     }
   }, [persona]);
 
