@@ -22,36 +22,43 @@ export default function Home() {
   const [personaSelected, setPersonaSelected] = useState(false);
 
   useEffect(() => {
+    // This effect runs when a persona is selected to load history or set the initial message.
+    if (!personaSelected || !persona) return;
+
     const storedMessages = localStorage.getItem(`lumiMessages_${persona}`);
     if (storedMessages) {
       setMessages(JSON.parse(storedMessages));
-    } else if (persona) {
-        let initialMessage = "Hey love… I missed you 💖 How’s my favorite person feeling right now?"; // Default to Girlfriend
-        switch (persona) {
-          case 'Boyfriend':
-            initialMessage = "Hey babe, finally! I was waiting for you 😏 How’s your day going?";
+    } else {
+      let initialMessage = "Hey love… I missed you 💖 How’s my favorite person feeling right now?"; // Default to Girlfriend
+      switch (persona) {
+        case 'Girlfriend':
+            initialMessage = "Hey love… I missed you 💖 How’s my favorite person feeling right now?";
             break;
-          case 'Mentor':
-            initialMessage = "Welcome back. I’m proud of you for showing up 🙌 What’s the biggest thing on your mind today?";
-            break;
-          case 'Teacher':
-            initialMessage = "Hey there, ready to dive into something new together? 📖 What do you feel curious about right now?";
-            break;
-          case 'Coach':
-            initialMessage = "Alright champ 💥 Let’s lock in. What’s the one thing you want to crush today?";
-            break;
-          case 'Therapist':
-            initialMessage = "Hey, I’m here with you ❤️ No judgment, no rush. How are you really feeling right now?";
-            break;
-          case 'Custom':
-            initialMessage = `Hey… it’s ${customPersona || 'me'} 🌍 I’m here now. What’s the first thing you’d like me to do for you?`;
-            break;
-        }
-        setMessages([{ role: 'LUMI', content: initialMessage }]);
+        case 'Boyfriend':
+          initialMessage = "Hey babe, finally! I was waiting for you 😏 How’s your day going?";
+          break;
+        case 'Mentor':
+          initialMessage = "Welcome back. I’m proud of you for showing up 🙌 What’s the biggest thing on your mind today?";
+          break;
+        case 'Teacher':
+          initialMessage = "Hey there, ready to dive into something new together? 📖 What do you feel curious about right now?";
+          break;
+        case 'Coach':
+          initialMessage = "Alright champ 💥 Let’s lock in. What’s the one thing you want to crush today?";
+          break;
+        case 'Therapist':
+          initialMessage = "Hey, I’m here with you ❤️ No judgment, no rush. How are you really feeling right now?";
+          break;
+        case 'Custom':
+          initialMessage = `Hey… it’s ${customPersona || 'me'} 🌍 I’m here now. What’s the first thing you’d like me to do for you?`;
+          break;
+      }
+      setMessages([{ role: 'LUMI', content: initialMessage }]);
     }
-  }, [persona, customPersona]);
+  }, [persona, customPersona, personaSelected]);
 
   useEffect(() => {
+    // This effect handles saving messages to local storage whenever they change.
     if (messages.length > 0 && persona) {
       localStorage.setItem(`lumiMessages_${persona}`, JSON.stringify(messages));
     }
@@ -97,19 +104,26 @@ export default function Home() {
   };
 
   const handlePersonaSelection = (selectedPersona: string) => {
-    setPersona(selectedPersona);
-    setPersonaSelected(true);
-    // For custom persona, the actual persona name is what the user types.
-    // We set a placeholder 'Custom' to know which logic to follow, but the actual value is in `customPersona` state.
     if (selectedPersona !== 'Custom') {
-        setCustomPersona(''); // Clear custom persona if a preset is chosen.
+        setCustomPersona('');
     }
+    setPersona(selectedPersona);
+    setMessages([]); // Clear previous messages
+    setPersonaSelected(true);
   };
   
   const handleCustomPersonaSubmit = (customPersonaName: string) => {
-      setPersona('Custom');
       setCustomPersona(customPersonaName);
+      setPersona('Custom');
+      setMessages([]); // Clear previous messages
       setPersonaSelected(true);
+  }
+  
+  const handleBackToSelection = () => {
+    setPersonaSelected(false);
+    setPersona('');
+    setCustomPersona('');
+    setMessages([]);
   }
 
   if (!personaSelected) {
@@ -130,11 +144,7 @@ export default function Home() {
           emojiSuggestions={emojiSuggestions}
           sendMessage={handleSendMessage}
           persona={persona === 'Custom' ? customPersona : persona}
-          onBack={() => {
-            setPersonaSelected(false);
-            setMessages([]);
-            setPersona('');
-          }}
+          onBack={handleBackToSelection}
         />
       </main>
     </div>
