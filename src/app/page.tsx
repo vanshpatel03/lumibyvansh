@@ -13,7 +13,7 @@ export type Message = {
 };
 
 // --- Persona-specific greeting variations ---
-const personaGreetings = {
+const personaGreetings: Record<string, string[]> = {
   Girlfriend: [
     'Hey love… I missed you 💖 How’s my favorite person feeling right now?',
     'Babe! You’re here 😍 Tell me everything, how’s your heart?',
@@ -54,7 +54,7 @@ const personaGreetings = {
 
 // --- Helper function to get a random greeting ---
 const getRandomGreeting = (persona: string, customPersonaName: string = '') => {
-  const greetings = personaGreetings[persona as keyof typeof personaGreetings] || personaGreetings.Default;
+  const greetings = personaGreetings[persona] || personaGreetings.Default;
   const randomIndex = Math.floor(Math.random() * greetings.length);
   let greeting = greetings[randomIndex];
   
