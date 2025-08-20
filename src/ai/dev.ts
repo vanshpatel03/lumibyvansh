@@ -1,1 +1,7 @@
-// Flows will be imported for their side effects in this file.
+import { config } from 'dotenv';
+config();
+
+import '@/ai/flows/expressive-ui.ts';
+import '@/ai/flows/emotional-reflection.ts';
+import '@/ai/flows/persona-adaption.ts';
+import '@/ai/flows/personalized-memory.ts';
