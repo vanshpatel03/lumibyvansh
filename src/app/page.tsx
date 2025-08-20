@@ -29,7 +29,7 @@ export default function Home() {
     if (storedMessages) {
       setMessages(JSON.parse(storedMessages));
     } else {
-      let initialMessage = "Hey love… I missed you 💖 How’s my favorite person feeling right now?"; // Default to Girlfriend
+      let initialMessage = "";
       switch (persona) {
         case 'Girlfriend':
             initialMessage = "Hey love… I missed you 💖 How’s my favorite person feeling right now?";
@@ -52,6 +52,9 @@ export default function Home() {
         case 'Custom':
           initialMessage = `Hey… it’s ${customPersona || 'me'} 🌍 I’m here now. What’s the first thing you’d like me to do for you?`;
           break;
+        default:
+            initialMessage = "Hey... I'm Lumi. How are you feeling right now?";
+            break;
       }
       setMessages([{ role: 'LUMI', content: initialMessage }]);
     }
@@ -60,9 +63,11 @@ export default function Home() {
   useEffect(() => {
     // This effect handles saving messages to local storage whenever they change.
     if (messages.length > 0 && persona) {
-      localStorage.setItem(`lumiMessages_${persona}`, JSON.stringify(messages));
+      // For custom persona, we use a consistent key to avoid creating too many storage items
+      const storageKey = persona === 'Custom' ? `lumiMessages_Custom_${customPersona}` : `lumiMessages_${persona}`;
+      localStorage.setItem(storageKey, JSON.stringify(messages));
     }
-  }, [messages, persona]);
+  }, [messages, persona, customPersona]);
 
   const handleSendMessage = async (userInput: string) => {
     setIsLoading(true);
