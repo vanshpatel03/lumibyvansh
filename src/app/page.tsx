@@ -1,7 +1,7 @@
 
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { ChatPanel } from '@/components/chat-panel';
 import { getLumiResponse, getExpressiveSuggestions } from './actions';
 import { useToast } from "@/hooks/use-toast";
@@ -76,23 +76,26 @@ export default function Home() {
   const [emojiSuggestions, setEmojiSuggestions] = useState<string[]>([]);
   const [view, setView] = useState<'persona' | 'chat'>('persona');
 
-  useEffect(() => {
-    // This effect runs when the chat view becomes active to load history or set the initial message.
-    if (view !== 'chat' || !persona) return;
-    
-    const effectivePersona = persona === 'Custom' ? `Custom_${customPersona}` : persona;
-    // We will now key storage by persona only, model can be changed in-chat
+  const startNewChat = useCallback((selectedPersona: string, customName: string) => {
+    const effectivePersona = selectedPersona === 'Custom' ? `Custom_${customName}` : selectedPersona;
     const storageKey = `lumiMessages_${effectivePersona}`;
     const storedMessages = localStorage.getItem(storageKey);
 
     if (storedMessages) {
       setMessages(JSON.parse(storedMessages));
     } else {
-      // Set a new random initial message if no history exists
-      const initialMessage = getRandomGreeting(persona, customPersona);
+      const initialMessage = getRandomGreeting(selectedPersona, customName);
       setMessages([{ role: 'LUMI', content: initialMessage }]);
     }
-  }, [view, persona, customPersona]);
+    setView('chat');
+  }, []);
+
+  useEffect(() => {
+    if (view === 'chat' && persona) {
+      startNewChat(persona, customPersona);
+    }
+  }, [view, persona, customPersona, startNewChat]);
+
 
   useEffect(() => {
     // This effect handles saving messages to local storage whenever they change.
@@ -147,7 +150,6 @@ export default function Home() {
         setCustomPersona('');
     }
     setPersona(selectedPersona);
-    setMessages([]); // Clear previous messages
     setModel('Vansh Meta'); // Default to Vansh Meta
     setView('chat'); // Go directly to chat
   };
@@ -155,7 +157,6 @@ export default function Home() {
   const handleCustomPersonaSubmit = (customPersonaName: string) => {
       setCustomPersona(customPersonaName);
       setPersona('Custom');
-      setMessages([]); // Clear previous messages
       setModel('Vansh Meta'); // Default to Vansh Meta
       setView('chat'); // Go directly to chat
   }
@@ -183,7 +184,7 @@ export default function Home() {
   }
 
   return (
-    <div className="h-screen w-screen flex flex-col bg-background text-foreground font-body">
+    <div className="h-dvh w-screen flex flex-col bg-background text-foreground font-body">
         <ChatPanel
           messages={messages}
           isLoading={isLoading}
