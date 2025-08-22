@@ -3,17 +3,16 @@ import { useState, useRef, useEffect, type FormEvent } from 'react';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { Textarea } from '@/components/ui/textarea';
 import { Button } from '@/components/ui/button';
-import { SendHorizonal, BrainCircuit, ArrowLeft } from 'lucide-react';
+import { SendHorizonal, BrainCircuit, ArrowLeft, ChevronDown } from 'lucide-react';
 import { ChatMessage } from './chat-message';
 import { EmojiSuggestions } from './emoji-suggestions';
 import type { Message } from '@/app/page';
 import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select"
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu"
 
 const models = [
   'Vansh Meta',
@@ -116,18 +115,21 @@ export function ChatPanel({
             className="flex-1 resize-none bg-muted focus-visible:ring-1 focus-visible:ring-ring"
             disabled={isLoading}
           />
-           <Select value={model} onValueChange={onModelChange} disabled={isLoading}>
-            <SelectTrigger className="w-auto sm:w-[150px] shrink-0">
-              <SelectValue placeholder="Select Model" />
-            </SelectTrigger>
-            <SelectContent>
+           <DropdownMenu>
+            <DropdownMenuTrigger asChild>
+              <Button variant="outline" className="w-auto sm:w-[150px] shrink-0">
+                Select Model
+                <ChevronDown className="ml-2 h-4 w-4" />
+              </Button>
+            </DropdownMenuTrigger>
+            <DropdownMenuContent>
               {models.map((modelName) => (
-                <SelectItem key={modelName} value={modelName}>
+                <DropdownMenuItem key={modelName} onSelect={() => onModelChange(modelName)}>
                   {modelName}
-                </SelectItem>
+                </DropdownMenuItem>
               ))}
-            </SelectContent>
-          </Select>
+            </DropdownMenuContent>
+          </DropdownMenu>
           <Button
             type="submit"
             size="icon"
