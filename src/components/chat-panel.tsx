@@ -3,7 +3,7 @@ import { useState, useRef, useEffect, type FormEvent } from 'react';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { Textarea } from '@/components/ui/textarea';
 import { Button } from '@/components/ui/button';
-import { SendHorizonal, BrainCircuit, ArrowLeft, ChevronDown } from 'lucide-react';
+import { SendHorizonal, BrainCircuit, ArrowLeft, Sparkles } from 'lucide-react';
 import { ChatMessage } from './chat-message';
 import { EmojiSuggestions } from './emoji-suggestions';
 import type { Message } from '@/app/page';
@@ -12,11 +12,18 @@ import {
   DropdownMenuContent,
   DropdownMenuItem,
   DropdownMenuTrigger,
+  DropdownMenuSeparator,
+  DropdownMenuLabel
 } from "@/components/ui/dropdown-menu"
+import { cn } from '@/lib/utils';
+
 
 const models = [
   'Vansh Meta',
   'Vansh Prime',
+];
+
+const proModels = [
   'Vansh Ultra',
   'Vansh Phantom',
 ];
@@ -30,6 +37,7 @@ type ChatPanelProps = {
   model: string;
   onBack: () => void;
   onModelChange: (model: string) => void;
+  isSubscribed: boolean;
 };
 
 export function ChatPanel({
@@ -41,6 +49,7 @@ export function ChatPanel({
   model,
   onBack,
   onModelChange,
+  isSubscribed,
 }: ChatPanelProps) {
   const [input, setInput] = useState('');
   const scrollAreaRef = useRef<HTMLDivElement>(null);
@@ -84,7 +93,10 @@ export function ChatPanel({
             </Button>
             <div>
               <h2 className="text-xl font-bold font-headline">{persona}</h2>
-              <p className="text-sm text-muted-foreground">Chatting with {model}</p>
+              <p className={cn("text-sm flex items-center gap-1.5", isSubscribed ? "text-primary font-semibold" : "text-muted-foreground")}>
+                {isSubscribed && <Sparkles className="w-4 h-4 text-primary" />}
+                {model}
+              </p>
             </div>
           </div>
       </header>
@@ -117,15 +129,25 @@ export function ChatPanel({
           />
            <DropdownMenu>
             <DropdownMenuTrigger asChild>
-              <Button variant="outline" className="w-auto sm:w-[150px] shrink-0">
+              <Button variant="outline">
                 Select Model
-                <ChevronDown className="ml-2 h-4 w-4" />
               </Button>
             </DropdownMenuTrigger>
-            <DropdownMenuContent>
+            <DropdownMenuContent align="end" className="w-56">
+              <DropdownMenuLabel>Standard Models</DropdownMenuLabel>
               {models.map((modelName) => (
-                <DropdownMenuItem key={modelName} onSelect={() => onModelChange(modelName)}>
+                <DropdownMenuItem key={modelName} onSelect={() => onModelChange(modelName)} disabled={model === modelName}>
                   {modelName}
+                </DropdownMenuItem>
+              ))}
+              <DropdownMenuSeparator />
+              <DropdownMenuLabel className="flex items-center gap-2">
+                <Sparkles className="text-primary" /> Lumi Pro Models
+              </DropdownMenuLabel>
+              {proModels.map((modelName) => (
+                <DropdownMenuItem key={modelName} onSelect={() => onModelChange(modelName)} disabled={model === modelName}>
+                  <span className="flex-1">{modelName}</span>
+                  {!isSubscribed && <span className="text-xs bg-primary/20 text-primary font-bold px-1.5 py-0.5 rounded-full">PRO</span>}
                 </DropdownMenuItem>
               ))}
             </DropdownMenuContent>

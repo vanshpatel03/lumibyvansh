@@ -6,6 +6,7 @@ import { ChatPanel } from '@/components/chat-panel';
 import { getLumiResponse, getExpressiveSuggestions } from './actions';
 import { useToast } from "@/hooks/use-toast";
 import { PersonaSelection } from '@/components/persona-selection';
+import { UpgradeModal } from '@/components/upgrade-modal';
 
 export type Message = {
   role: 'user' | 'LUMI';
@@ -75,17 +76,27 @@ export default function Home() {
   const [isLoading, setIsLoading] = useState(false);
   const [emojiSuggestions, setEmojiSuggestions] = useState<string[]>([]);
   const [view, setView] = useState<'persona' | 'chat'>('persona');
+  const [isSubscribed, setIsSubscribed] = useState(false);
+  const [isUpgradeModalOpen, setIsUpgradeModalOpen] = useState(false);
 
   const startNewChat = useCallback((selectedPersona: string, customName: string) => {
     const effectivePersona = selectedPersona === 'Custom' ? `Custom_${customName}` : selectedPersona;
     const storageKey = `lumiMessages_${effectivePersona}`;
     const storedMessages = localStorage.getItem(storageKey);
 
+    const greeting = getRandomGreeting(selectedPersona, customName);
+
+    // Always check if there are stored messages, if not, set the new greeting.
+    // If there are, we load them, but if it's just the initial greeting, we can replace it.
     if (storedMessages) {
-      setMessages(JSON.parse(storedMessages));
+      const parsedMessages = JSON.parse(storedMessages);
+      if (parsedMessages.length > 1) {
+        setMessages(parsedMessages);
+      } else {
+        setMessages([{ role: 'LUMI', content: greeting }]);
+      }
     } else {
-      const initialMessage = getRandomGreeting(selectedPersona, customName);
-      setMessages([{ role: 'LUMI', content: initialMessage }]);
+      setMessages([{ role: 'LUMI', content: greeting }]);
     }
     setView('chat');
   }, []);
@@ -162,9 +173,16 @@ export default function Home() {
   }
 
   const handleModelChange = (newModel: string) => {
-    // When the model is changed in the chat view, we just update the state.
-    // We could add a system message here if desired, e.g. "Lumi's intelligence has been updated to Vansh Prime."
-    setModel(newModel);
+    const isProModel = newModel === 'Vansh Ultra' || newModel === 'Vansh Phantom';
+    if (isProModel && !isSubscribed) {
+      setIsUpgradeModalOpen(true);
+    } else {
+      setModel(newModel);
+      toast({
+        title: "Model Updated ✨",
+        description: `Lumi is now powered by ${newModel}.`,
+      })
+    }
   }
   
   const handleBackToPersonaSelection = () => {
@@ -172,6 +190,16 @@ export default function Home() {
     setPersona('');
     setCustomPersona('');
     setMessages([]);
+  }
+
+  const handleUpgrade = () => {
+    setIsSubscribed(true);
+    setIsUpgradeModalOpen(false);
+    setModel('Vansh Ultra'); // Automatically switch to the first Pro model
+     toast({
+        title: "Welcome to Lumi Pro! 💎",
+        description: "You've unlocked the most powerful models. Lumi is now powered by Vansh Ultra.",
+      })
   }
 
   if (view === 'persona') {
@@ -184,17 +212,25 @@ export default function Home() {
   }
 
   return (
-    <div className="h-dvh w-screen flex flex-col bg-background text-foreground font-body">
-        <ChatPanel
-          messages={messages}
-          isLoading={isLoading}
-          emojiSuggestions={emojiSuggestions}
-          sendMessage={handleSendMessage}
-          persona={persona === 'Custom' ? customPersona : persona}
-          model={model}
-          onBack={handleBackToPersonaSelection}
-          onModelChange={handleModelChange}
-        />
-    </div>
+    <>
+      <div className="h-dvh w-screen flex flex-col bg-background text-foreground font-body">
+          <ChatPanel
+            messages={messages}
+            isLoading={isLoading}
+            emojiSuggestions={emojiSuggestions}
+            sendMessage={handleSendMessage}
+            persona={persona === 'Custom' ? customPersona : persona}
+            model={model}
+            onBack={handleBackToPersonaSelection}
+            onModelChange={handleModelChange}
+            isSubscribed={isSubscribed}
+          />
+      </div>
+      <UpgradeModal 
+        isOpen={isUpgradeModalOpen}
+        onOpenChange={setIsUpgradeModalOpen}
+        onUpgrade={handleUpgrade}
+      />
+    </>
   );
 }
