@@ -50,8 +50,8 @@ export function PersonaSelection({ onSelectPersona, onCustomSubmit }: PersonaSel
   }
 
   return (
-    <div className="flex flex-col items-center justify-center min-h-screen bg-background text-foreground font-body">
-      <header className="absolute top-0 w-full py-4 text-center text-base text-muted-foreground">
+    <div className="flex flex-col items-center justify-center min-h-screen bg-background text-foreground font-body p-4">
+      <header className="w-full py-4 text-center text-base text-muted-foreground">
         made by vansh rabadiya
       </header>
       <main className="flex-1 flex items-center justify-center w-full">

@@ -12,7 +12,7 @@ import {
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { Textarea } from '@/components/ui/textarea';
 import { Button } from '@/components/ui/button';
-import { SendHorizonal, BrainCircuit, ArrowLeft, Sparkles } from 'lucide-react';
+import { SendHorizonal, BrainCircuit, ArrowLeft, Sparkles, ChevronDown } from 'lucide-react';
 import { ChatMessage } from './chat-message';
 import { EmojiSuggestions } from './emoji-suggestions';
 import type { Message } from '@/app/page';
@@ -89,6 +89,35 @@ export function ChatPanel({
     }
   };
 
+  const ModelSelector = () => (
+    <Select onValueChange={onModelChange} value={model}>
+        <SelectTrigger className="w-auto h-auto px-3 py-1 text-xs sm:text-sm sm:h-10 sm:px-3 sm:py-2 md:w-[150px] shrink-0 border-2 border-primary/50 font-semibold">
+          <SelectValue>Select Model</SelectValue>
+        </SelectTrigger>
+        <SelectContent>
+            <SelectGroup>
+                <SelectLabel>Standard Models</SelectLabel>
+                {models.map((modelName) => (
+                    <SelectItem key={modelName} value={modelName}>
+                        {modelName}
+                    </SelectItem>
+                ))}
+            </SelectGroup>
+            <SelectGroup>
+                <SelectLabel>Lumi Pro Models</SelectLabel>
+                {proModels.map((modelName) => (
+                   <SelectItem key={modelName} value={modelName}>
+                     <div className="flex items-center justify-between w-full">
+                       <span>{modelName}</span>
+                       {!isSubscribed && <span className="text-xs bg-primary/20 text-primary font-bold px-1.5 py-0.5 rounded-full ml-2">PRO</span>}
+                     </div>
+                   </SelectItem>
+                ))}
+            </SelectGroup>
+        </SelectContent>
+    </Select>
+  );
+
   return (
     <div className="flex flex-col h-full bg-background">
       <header className="p-4 border-b flex items-center justify-between shrink-0">
@@ -103,6 +132,9 @@ export function ChatPanel({
                 {model}
               </p>
             </div>
+          </div>
+          <div className="md:hidden">
+            <ModelSelector />
           </div>
       </header>
       <ScrollArea className="flex-1" ref={scrollAreaRef}>
@@ -122,7 +154,7 @@ export function ChatPanel({
       </ScrollArea>
       <div className="p-4 border-t bg-card/50 shrink-0">
         <EmojiSuggestions emojis={emojiSuggestions} onSelect={handleEmojiSelect} />
-        <form onSubmit={handleSubmit} className="flex items-center gap-2">
+        <form onSubmit={handleSubmit} className="flex items-start gap-2">
           <Textarea
             value={input}
             onChange={(e) => setInput(e.target.value)}
@@ -132,37 +164,14 @@ export function ChatPanel({
             className="flex-1 resize-none bg-muted focus-visible:ring-1 focus-visible:ring-ring"
             disabled={isLoading}
           />
-           <Select onValueChange={onModelChange} value={model}>
-                <SelectTrigger className="w-auto sm:w-[150px] shrink-0">
-                    <SelectValue>Select Model</SelectValue>
-                </SelectTrigger>
-                <SelectContent>
-                    <SelectGroup>
-                        <SelectLabel>Standard Models</SelectLabel>
-                        {models.map((modelName) => (
-                            <SelectItem key={modelName} value={modelName}>
-                                {modelName}
-                            </SelectItem>
-                        ))}
-                    </SelectGroup>
-                    <SelectGroup>
-                        <SelectLabel>Lumi Pro Models</SelectLabel>
-                        {proModels.map((modelName) => (
-                           <SelectItem key={modelName} value={modelName}>
-                             <div className="flex items-center justify-between w-full">
-                               <span>{modelName}</span>
-                               {!isSubscribed && <span className="text-xs bg-primary/20 text-primary font-bold px-1.5 py-0.5 rounded-full ml-2">PRO</span>}
-                             </div>
-                           </SelectItem>
-                        ))}
-                    </SelectGroup>
-                </SelectContent>
-            </Select>
+          <div className="hidden md:block">
+            <ModelSelector />
+          </div>
           <Button
             type="submit"
             size="icon"
             disabled={isLoading || !input.trim()}
-            className="rounded-full shrink-0"
+            className="rounded-full shrink-0 aspect-square"
           >
             <SendHorizonal className="h-5 w-5" />
             <span className="sr-only">Send</span>
