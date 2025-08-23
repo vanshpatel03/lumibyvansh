@@ -71,7 +71,6 @@ const getRandomGreeting = (persona: string, customPersonaName: string = '') => {
 
 function HomeContent() {
   const { toast } = useToast();
-  const searchParams = useSearchParams();
   const [model, setModel] = useState('Vansh Meta');
   const [persona, setPersona] = useState('');
   const [customPersona, setCustomPersona] = useState('');
@@ -81,24 +80,6 @@ function HomeContent() {
   const [view, setView] = useState<'persona' | 'chat'>('persona');
   const [isSubscribed, setIsSubscribed] = useState(false);
   const [isUpgradeModalOpen, setIsUpgradeModalOpen] = useState(false);
-
-  useEffect(() => {
-    const sessionId = searchParams.get('session_id');
-    if (sessionId) {
-      setIsSubscribed(true);
-      setModel('Vansh Spectre'); // Automatically switch to the first Pro model
-      toast({
-        title: "Welcome to Lumi Pro! 💎",
-        description: "You've unlocked the most powerful models. Lumi is now powered by Vansh Spectre.",
-      });
-      // Try to re-enter chat view if a persona was selected
-      const lastPersona = localStorage.getItem('lumi_last_persona');
-      const lastCustomPersona = localStorage.getItem('lumi_last_custom_persona');
-      if (lastPersona) {
-        handlePersonaSelection(lastPersona, lastCustomPersona || '');
-      }
-    }
-  }, [searchParams, toast]);
 
   const startNewChat = useCallback((selectedPersona: string, customName: string) => {
     const effectivePersona = selectedPersona === 'Custom' ? `Custom_${customName}` : selectedPersona;
@@ -208,6 +189,16 @@ function HomeContent() {
     localStorage.removeItem('lumi_last_custom_persona');
   }
 
+  const handleUpgrade = () => {
+    setIsSubscribed(true);
+    setModel('Vansh Spectre'); // Automatically switch to the first Pro model
+    setIsUpgradeModalOpen(false);
+    toast({
+      title: "Welcome to Lumi Pro! 💎",
+      description: "You've unlocked the most powerful models. Lumi is now powered by Vansh Spectre.",
+    });
+  };
+
   if (view === 'persona') {
     return (
       <PersonaSelection 
@@ -240,6 +231,7 @@ function HomeContent() {
       <UpgradeModal 
         isOpen={isUpgradeModalOpen}
         onOpenChange={setIsUpgradeModalOpen}
+        onUpgrade={handleUpgrade}
       />
     </>
   );

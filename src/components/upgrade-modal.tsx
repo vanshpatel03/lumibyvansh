@@ -12,50 +12,24 @@ import {
 } from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
 import { Sparkles, Zap, Loader2 } from 'lucide-react';
-import { createStripeCheckoutSession } from '@/app/actions';
 import { useToast } from '@/hooks/use-toast';
 
 type UpgradeModalProps = {
   isOpen: boolean;
   onOpenChange: (isOpen: boolean) => void;
-  // onUpgrade is no longer needed as we redirect to stripe
+  onUpgrade: () => void;
 };
 
-export function UpgradeModal({ isOpen, onOpenChange }: UpgradeModalProps) {
+export function UpgradeModal({ isOpen, onOpenChange, onUpgrade }: UpgradeModalProps) {
   const [isLoading, setIsLoading] = useState(false);
   const { toast } = useToast();
 
   const handleUpgrade = async () => {
     setIsLoading(true);
-    try {
-      const { url, error } = await createStripeCheckoutSession();
-      if (error) {
-        throw new Error(error);
-      }
-      if (url) {
-        window.location.href = url;
-      } else {
-        throw new Error('Could not get redirect URL');
-      }
-    } catch (error) {
-      console.error(error);
-      const errorMessage = (error as Error).message;
-      
-      if (errorMessage.includes('Stripe is not configured')) {
-         toast({
-            variant: "destructive",
-            title: "Payments Not Configured",
-            description: "The Stripe API key is missing. Please add it to your environment variables.",
-          });
-      } else {
-        toast({
-          variant: "destructive",
-          title: "Oh no, something went wrong.",
-          description: "We couldn't connect to our payment provider. Please try again later.",
-        });
-      }
-      setIsLoading(false);
-    }
+    // Simulate API call
+    await new Promise(resolve => setTimeout(resolve, 1000));
+    onUpgrade();
+    setIsLoading(false);
   };
 
 
