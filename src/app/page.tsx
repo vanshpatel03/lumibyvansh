@@ -229,6 +229,7 @@ export default function Home() {
             onModelChange={handleModelChange}
             isSubscribed={isSubscribed}
             remainingMessages={remainingMessages}
+            trialMessageLimit={TRIAL_MESSAGE_LIMIT}
           />
       </div>
       <UpgradeModal 

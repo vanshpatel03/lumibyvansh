@@ -40,6 +40,7 @@ type ChatPanelProps = {
   onModelChange: (model: string) => void;
   isSubscribed: boolean;
   remainingMessages: number;
+  trialMessageLimit: number;
 };
 
 export function ChatPanel({
@@ -53,6 +54,7 @@ export function ChatPanel({
   onModelChange,
   isSubscribed,
   remainingMessages,
+  trialMessageLimit,
 }: ChatPanelProps) {
   const [input, setInput] = useState('');
   const scrollAreaRef = useRef<HTMLDivElement>(null);
@@ -167,7 +169,7 @@ export function ChatPanel({
           </Button>
         </form>
          <footer className="pt-2 text-center text-xs text-muted-foreground">
-           {!isSubscribed && remainingMessages <= TRIAL_MESSAGE_LIMIT && remainingMessages > 0 && (
+           {!isSubscribed && remainingMessages <= trialMessageLimit && remainingMessages > 0 && (
             <p>You have {remainingMessages} messages left in your trial.</p>
            )}
             {!isSubscribed && remainingMessages <= 0 && (
