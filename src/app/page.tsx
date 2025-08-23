@@ -116,7 +116,9 @@ export default function Home() {
   }, [messages]);
 
   const handleSendMessage = async (userInput: string) => {
-    if (!isSubscribed && userMessageCount >= TRIAL_MESSAGE_LIMIT) {
+    const isProModel = model === 'Vansh Spectre' || model === 'Vansh Phantom';
+
+    if (!isSubscribed && userMessageCount >= TRIAL_MESSAGE_LIMIT && !isProModel) {
       setIsUpgradeModalOpen(true);
       return;
     }
@@ -210,6 +212,9 @@ export default function Home() {
     );
   }
 
+  const isProModelInUse = model === 'Vansh Spectre' || model === 'Vansh Phantom';
+  const remainingMessages = isSubscribed || isProModelInUse ? Infinity : TRIAL_MESSAGE_LIMIT - userMessageCount;
+
   return (
     <>
       <div className="h-dvh w-screen flex flex-col bg-background text-foreground font-body">
@@ -223,7 +228,7 @@ export default function Home() {
             onBack={handleBackToPersonaSelection}
             onModelChange={handleModelChange}
             isSubscribed={isSubscribed}
-            remainingMessages={isSubscribed ? Infinity : TRIAL_MESSAGE_LIMIT - userMessageCount}
+            remainingMessages={remainingMessages}
           />
       </div>
       <UpgradeModal 

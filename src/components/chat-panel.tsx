@@ -1,5 +1,14 @@
 
 import { useState, useRef, useEffect, type FormEvent } from 'react';
+import {
+    Select,
+    SelectContent,
+    SelectItem,
+    SelectTrigger,
+    SelectValue,
+    SelectGroup,
+    SelectLabel,
+} from "@/components/ui/select"
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { Textarea } from '@/components/ui/textarea';
 import { Button } from '@/components/ui/button';
@@ -7,14 +16,6 @@ import { SendHorizonal, BrainCircuit, ArrowLeft, Sparkles } from 'lucide-react';
 import { ChatMessage } from './chat-message';
 import { EmojiSuggestions } from './emoji-suggestions';
 import type { Message } from '@/app/page';
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuTrigger,
-  DropdownMenuSeparator,
-  DropdownMenuLabel
-} from "@/components/ui/dropdown-menu"
 import { cn } from '@/lib/utils';
 
 
@@ -129,31 +130,32 @@ export function ChatPanel({
             className="flex-1 resize-none bg-muted focus-visible:ring-1 focus-visible:ring-ring"
             disabled={isLoading}
           />
-           <DropdownMenu>
-            <DropdownMenuTrigger asChild>
-              <Button variant="outline">
-                Select Model
-              </Button>
-            </DropdownMenuTrigger>
-            <DropdownMenuContent align="end" className="w-56">
-              <DropdownMenuLabel>Standard Models</DropdownMenuLabel>
-              {models.map((modelName) => (
-                <DropdownMenuItem key={modelName} onSelect={() => onModelChange(modelName)} disabled={model === modelName}>
-                  {modelName}
-                </DropdownMenuItem>
-              ))}
-              <DropdownMenuSeparator />
-              <DropdownMenuLabel className="flex items-center gap-2">
-                <Sparkles className="text-primary" /> Lumi Pro Models
-              </DropdownMenuLabel>
-              {proModels.map((modelName) => (
-                <DropdownMenuItem key={modelName} onSelect={() => onModelChange(modelName)} disabled={model === modelName}>
-                  <span className="flex-1">{modelName}</span>
-                  {!isSubscribed && <span className="text-xs bg-primary/20 text-primary font-bold px-1.5 py-0.5 rounded-full">PRO</span>}
-                </DropdownMenuItem>
-              ))}
-            </DropdownMenuContent>
-          </DropdownMenu>
+           <Select onValueChange={onModelChange} value={model}>
+                <SelectTrigger className="w-auto sm:w-[150px] shrink-0">
+                    <SelectValue placeholder="Select Model" />
+                </SelectTrigger>
+                <SelectContent>
+                    <SelectGroup>
+                        <SelectLabel>Standard Models</SelectLabel>
+                        {models.map((modelName) => (
+                            <SelectItem key={modelName} value={modelName}>
+                                {modelName}
+                            </SelectItem>
+                        ))}
+                    </SelectGroup>
+                    <SelectGroup>
+                        <SelectLabel>Lumi Pro Models</SelectLabel>
+                        {proModels.map((modelName) => (
+                           <SelectItem key={modelName} value={modelName}>
+                             <div className="flex items-center justify-between w-full">
+                               <span>{modelName}</span>
+                               {!isSubscribed && <span className="text-xs bg-primary/20 text-primary font-bold px-1.5 py-0.5 rounded-full ml-2">PRO</span>}
+                             </div>
+                           </SelectItem>
+                        ))}
+                    </SelectGroup>
+                </SelectContent>
+            </Select>
           <Button
             type="submit"
             size="icon"
@@ -165,9 +167,12 @@ export function ChatPanel({
           </Button>
         </form>
          <footer className="pt-2 text-center text-xs text-muted-foreground">
-           {!isSubscribed && remainingMessages >= 0 && (
+           {!isSubscribed && remainingMessages <= TRIAL_MESSAGE_LIMIT && remainingMessages > 0 && (
             <p>You have {remainingMessages} messages left in your trial.</p>
            )}
+            {!isSubscribed && remainingMessages <= 0 && (
+                <p>Your trial has ended. Please upgrade to continue.</p>
+            )}
            <p className="mt-1">made by vansh rabadiya</p>
         </footer>
       </div>
