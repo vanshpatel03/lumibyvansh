@@ -134,7 +134,7 @@ export function ChatPanel({
           />
            <Select onValueChange={onModelChange} value={model}>
                 <SelectTrigger className="w-auto sm:w-[150px] shrink-0">
-                    <SelectValue placeholder="Select Model" />
+                    <SelectValue>Select Model</SelectValue>
                 </SelectTrigger>
                 <SelectContent>
                     <SelectGroup>
