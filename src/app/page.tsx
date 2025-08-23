@@ -1,12 +1,13 @@
 
 'use client';
 
-import { useState, useEffect, useCallback, useMemo } from 'react';
+import { useState, useEffect, useCallback, useMemo, Suspense } from 'react';
 import { ChatPanel } from '@/components/chat-panel';
 import { getLumiResponse, getExpressiveSuggestions } from './actions';
 import { useToast } from "@/hooks/use-toast";
 import { PersonaSelection } from '@/components/persona-selection';
 import { UpgradeModal } from '@/components/upgrade-modal';
+import { useSearchParams } from 'next/navigation';
 
 export type Message = {
   role: 'user' | 'LUMI';
@@ -68,9 +69,9 @@ const getRandomGreeting = (persona: string, customPersonaName: string = '') => {
   return greeting;
 };
 
-
-export default function Home() {
+function HomeContent() {
   const { toast } = useToast();
+  const searchParams = useSearchParams();
   const [model, setModel] = useState('Vansh Meta');
   const [persona, setPersona] = useState('');
   const [customPersona, setCustomPersona] = useState('');
@@ -81,29 +82,42 @@ export default function Home() {
   const [isSubscribed, setIsSubscribed] = useState(false);
   const [isUpgradeModalOpen, setIsUpgradeModalOpen] = useState(false);
 
+  useEffect(() => {
+    const sessionId = searchParams.get('session_id');
+    if (sessionId) {
+      setIsSubscribed(true);
+      setModel('Vansh Spectre'); // Automatically switch to the first Pro model
+      toast({
+        title: "Welcome to Lumi Pro! 💎",
+        description: "You've unlocked the most powerful models. Lumi is now powered by Vansh Spectre.",
+      });
+      // Try to re-enter chat view if a persona was selected
+      const lastPersona = localStorage.getItem('lumi_last_persona');
+      const lastCustomPersona = localStorage.getItem('lumi_last_custom_persona');
+      if (lastPersona) {
+        handlePersonaSelection(lastPersona, lastCustomPersona || '');
+      }
+    }
+  }, [searchParams, toast]);
+
   const startNewChat = useCallback((selectedPersona: string, customName: string) => {
     const effectivePersona = selectedPersona === 'Custom' ? `Custom_${customName}` : selectedPersona;
     const storageKey = `lumiMessages_${effectivePersona}`;
     const storedMessages = localStorage.getItem(storageKey);
-
-    // Always get a new greeting when starting a chat session
     const greeting = getRandomGreeting(selectedPersona, customName);
 
     if (storedMessages) {
       const parsedMessages: Message[] = JSON.parse(storedMessages);
-      // Only load old messages if it's more than just the greeting
       if (parsedMessages.length > 1) {
         setMessages(parsedMessages);
         return;
       }
     }
     
-    // Otherwise, start with a fresh greeting
     setMessages([{ role: 'LUMI', content: greeting }]);
   }, []);
 
   useEffect(() => {
-    // This effect handles saving messages to local storage whenever they change.
     if (messages.length > 0 && view === 'chat' && persona) {
       const effectivePersona = persona === 'Custom' ? `Custom_${customPersona}` : persona;
       const storageKey = `lumiMessages_${effectivePersona}`;
@@ -118,7 +132,7 @@ export default function Home() {
   const handleSendMessage = async (userInput: string) => {
     const isProModel = model === 'Vansh Spectre' || model === 'Vansh Phantom';
 
-    if (!isSubscribed && userMessageCount >= TRIAL_MESSAGE_LIMIT && !isProModel) {
+    if (!isSubscribed && !isProModel && userMessageCount >= TRIAL_MESSAGE_LIMIT) {
       setIsUpgradeModalOpen(true);
       return;
     }
@@ -131,15 +145,11 @@ export default function Home() {
 
     try {
       const storyMemory = newMessages.map(msg => `${msg.role}: ${msg.content}`).join('\n');
-      
       const effectivePersona = persona === 'Custom' ? customPersona : persona;
-
       const lumiResult = await getLumiResponse(effectivePersona, storyMemory, userInput, model);
-      
       const lumiMessage = { role: 'LUMI', content: lumiResult.response };
       setMessages(prev => [...prev, lumiMessage]);
 
-      // Don't call for emoji suggestions if the response is the default error message
       if (lumiResult.response !== "Oh, my heart... I'm feeling a little overwhelmed right now. Can we talk about something else?") {
         const suggestionsResult = await getExpressiveSuggestions(lumiResult.response);
         if (suggestionsResult.emojiSuggestions) {
@@ -154,7 +164,6 @@ export default function Home() {
         title: "Oh no, something went wrong.",
         description: "My digital soul is a bit tangled right now. Please try again in a moment.",
       });
-      // remove last user message on error
       setMessages(prev => prev.slice(0, -1));
     } finally {
       setIsLoading(false);
@@ -164,7 +173,11 @@ export default function Home() {
   const handlePersonaSelection = (selectedPersona: string, customPersonaName: string = '') => {
     setPersona(selectedPersona);
     setCustomPersona(customPersonaName);
-    setModel('Vansh Meta');
+    localStorage.setItem('lumi_last_persona', selectedPersona);
+    localStorage.setItem('lumi_last_custom_persona', customPersonaName);
+    if (!isSubscribed) {
+      setModel('Vansh Meta');
+    }
     setView('chat');
     startNewChat(selectedPersona, customPersonaName);
   };
@@ -191,16 +204,8 @@ export default function Home() {
     setPersona('');
     setCustomPersona('');
     setMessages([]);
-  }
-
-  const handleUpgrade = () => {
-    setIsSubscribed(true);
-    setIsUpgradeModalOpen(false);
-    setModel('Vansh Spectre'); // Automatically switch to the first Pro model
-     toast({
-        title: "Welcome to Lumi Pro! 💎",
-        description: "You've unlocked the most powerful models. Lumi is now powered by Vansh Spectre.",
-      })
+    localStorage.removeItem('lumi_last_persona');
+    localStorage.removeItem('lumi_last_custom_persona');
   }
 
   if (view === 'persona') {
@@ -235,8 +240,15 @@ export default function Home() {
       <UpgradeModal 
         isOpen={isUpgradeModalOpen}
         onOpenChange={setIsUpgradeModalOpen}
-        onUpgrade={handleUpgrade}
       />
     </>
   );
+}
+
+export default function Home() {
+  return (
+    <Suspense fallback={<div>Loading...</div>}>
+      <HomeContent />
+    </Suspense>
+  )
 }

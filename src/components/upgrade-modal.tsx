@@ -1,6 +1,7 @@
 
 'use client';
 
+import { useState } from 'react';
 import {
   Dialog,
   DialogContent,
@@ -10,15 +11,41 @@ import {
   DialogFooter,
 } from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
-import { Sparkles, Zap } from 'lucide-react';
+import { Sparkles, Zap, Loader2 } from 'lucide-react';
+import { createStripeCheckoutSession } from '@/app/actions';
+import { useToast } from '@/hooks/use-toast';
 
 type UpgradeModalProps = {
   isOpen: boolean;
   onOpenChange: (isOpen: boolean) => void;
-  onUpgrade: () => void;
+  // onUpgrade is no longer needed as we redirect to stripe
 };
 
-export function UpgradeModal({ isOpen, onOpenChange, onUpgrade }: UpgradeModalProps) {
+export function UpgradeModal({ isOpen, onOpenChange }: UpgradeModalProps) {
+  const [isLoading, setIsLoading] = useState(false);
+  const { toast } = useToast();
+
+  const handleUpgrade = async () => {
+    setIsLoading(true);
+    try {
+      const { url } = await createStripeCheckoutSession();
+      if (url) {
+        window.location.href = url;
+      } else {
+        throw new Error('Could not get redirect URL');
+      }
+    } catch (error) {
+      console.error(error);
+      toast({
+        variant: "destructive",
+        title: "Oh no, something went wrong.",
+        description: "We couldn't connect to our payment provider. Please try again later.",
+      });
+      setIsLoading(false);
+    }
+  };
+
+
   return (
     <Dialog open={isOpen} onOpenChange={onOpenChange}>
       <DialogContent className="max-w-md">
@@ -28,22 +55,22 @@ export function UpgradeModal({ isOpen, onOpenChange, onUpgrade }: UpgradeModalPr
             </div>
           <DialogTitle className="text-2xl font-bold font-headline">Unlock Lumi Pro</DialogTitle>
           <DialogDescription className="text-lg text-muted-foreground">
-            Upgrade your companion to access the most powerful models and features.
+            Upgrade to access the most powerful models for just $9.99/month.
           </DialogDescription>
         </DialogHeader>
         <div className="my-6 space-y-4">
             <div className="flex items-start gap-4">
                 <Zap className="w-5 h-5 text-primary mt-1 shrink-0"/>
                 <div>
-                    <h4 className="font-semibold">Access Vansh Ultra & Phantom</h4>
+                    <h4 className="font-semibold">Access Vansh Spectre & Phantom</h4>
                     <p className="text-sm text-muted-foreground">Experience the pinnacle of conversational AI with our most advanced models.</p>
                 </div>
             </div>
             <div className="flex items-start gap-4">
                 <Zap className="w-5 h-5 text-primary mt-1 shrink-0"/>
                 <div>
-                    <h4 className="font-semibold">Priority Responses</h4>
-                    <p className="text-sm text-muted-foreground">Get faster, more detailed answers from Lumi, even during peak times.</p>
+                    <h4 className="font-semibold">Unlimited Messages</h4>
+                    <p className="text-sm text-muted-foreground">Chat with Lumi as much as you want without any limits.</p>
                 </div>
             </div>
              <div className="flex items-start gap-4">
@@ -55,8 +82,12 @@ export function UpgradeModal({ isOpen, onOpenChange, onUpgrade }: UpgradeModalPr
             </div>
         </div>
         <DialogFooter>
-          <Button onClick={onUpgrade} className="w-full text-lg h-12">
-            Go Pro
+          <Button onClick={handleUpgrade} disabled={isLoading} className="w-full text-lg h-12">
+            {isLoading ? (
+              <Loader2 className="animate-spin" />
+            ) : (
+              'Go Pro'
+            )}
           </Button>
         </DialogFooter>
       </DialogContent>
