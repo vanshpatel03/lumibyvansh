@@ -3,7 +3,7 @@
 
 import { adaptPersona } from '@/ai/flows/persona-adaption';
 import { generateExpressiveSuggestions } from '@/ai/flows/expressive-ui';
-import { stripe } from '@/lib/stripe';
+import { getStripe } from '@/lib/stripe';
 import { headers } from 'next/headers';
 
 export async function getLumiResponse(
@@ -39,11 +39,16 @@ export async function getExpressiveSuggestions(emotionalState: string) {
 export async function createStripeCheckoutSession() {
   const headersList = headers();
   const origin = headersList.get('origin');
+  const stripe = getStripe();
 
   if (!origin) {
     throw new Error('Could not determine origin');
   }
   
+  if (!stripe) {
+    throw new Error('Stripe is not configured. Please add STRIPE_SECRET_KEY to your environment variables.');
+  }
+
   try {
     const session = await stripe.checkout.sessions.create({
       payment_method_types: ['card'],
