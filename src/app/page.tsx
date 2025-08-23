@@ -1,7 +1,7 @@
 
 'use client';
 
-import { useState, useEffect, useCallback } from 'react';
+import { useState, useEffect, useCallback, useMemo } from 'react';
 import { ChatPanel } from '@/components/chat-panel';
 import { getLumiResponse, getExpressiveSuggestions } from './actions';
 import { useToast } from "@/hooks/use-toast";
@@ -53,6 +53,8 @@ const personaGreetings: Record<string, string[]> = {
   Default: ["Hey... I'm Lumi. How are you feeling right now?"]
 };
 
+const TRIAL_MESSAGE_LIMIT = 50;
+
 // --- Helper function to get a random greeting ---
 const getRandomGreeting = (persona: string, customPersonaName: string = '') => {
   const greetings = personaGreetings[persona] || personaGreetings.Default;
@@ -84,29 +86,21 @@ export default function Home() {
     const storageKey = `lumiMessages_${effectivePersona}`;
     const storedMessages = localStorage.getItem(storageKey);
 
+    // Always get a new greeting when starting a chat session
     const greeting = getRandomGreeting(selectedPersona, customName);
 
-    // Always check if there are stored messages, if not, set the new greeting.
-    // If there are, we load them, but if it's just the initial greeting, we can replace it.
     if (storedMessages) {
-      const parsedMessages = JSON.parse(storedMessages);
+      const parsedMessages: Message[] = JSON.parse(storedMessages);
+      // Only load old messages if it's more than just the greeting
       if (parsedMessages.length > 1) {
         setMessages(parsedMessages);
-      } else {
-        setMessages([{ role: 'LUMI', content: greeting }]);
+        return;
       }
-    } else {
-      setMessages([{ role: 'LUMI', content: greeting }]);
     }
-    setView('chat');
+    
+    // Otherwise, start with a fresh greeting
+    setMessages([{ role: 'LUMI', content: greeting }]);
   }, []);
-
-  useEffect(() => {
-    if (view === 'chat' && persona) {
-      startNewChat(persona, customPersona);
-    }
-  }, [view, persona, customPersona, startNewChat]);
-
 
   useEffect(() => {
     // This effect handles saving messages to local storage whenever they change.
@@ -116,8 +110,17 @@ export default function Home() {
       localStorage.setItem(storageKey, JSON.stringify(messages));
     }
   }, [messages, persona, customPersona, view]);
+  
+  const userMessageCount = useMemo(() => {
+    return messages.filter(m => m.role === 'user').length;
+  }, [messages]);
 
   const handleSendMessage = async (userInput: string) => {
+    if (!isSubscribed && userMessageCount >= TRIAL_MESSAGE_LIMIT) {
+      setIsUpgradeModalOpen(true);
+      return;
+    }
+
     setIsLoading(true);
     setEmojiSuggestions([]);
     
@@ -156,24 +159,20 @@ export default function Home() {
     }
   };
 
-  const handlePersonaSelection = (selectedPersona: string) => {
-    if (selectedPersona !== 'Custom') {
-        setCustomPersona('');
-    }
+  const handlePersonaSelection = (selectedPersona: string, customPersonaName: string = '') => {
     setPersona(selectedPersona);
-    setModel('Vansh Meta'); // Default to Vansh Meta
-    setView('chat'); // Go directly to chat
+    setCustomPersona(customPersonaName);
+    setModel('Vansh Meta');
+    setView('chat');
+    startNewChat(selectedPersona, customPersonaName);
   };
   
   const handleCustomPersonaSubmit = (customPersonaName: string) => {
-      setCustomPersona(customPersonaName);
-      setPersona('Custom');
-      setModel('Vansh Meta'); // Default to Vansh Meta
-      setView('chat'); // Go directly to chat
+    handlePersonaSelection('Custom', customPersonaName);
   }
 
   const handleModelChange = (newModel: string) => {
-    const isProModel = newModel === 'Vansh Ultra' || newModel === 'Vansh Phantom';
+    const isProModel = newModel === 'Vansh Spectre' || newModel === 'Vansh Phantom';
     if (isProModel && !isSubscribed) {
       setIsUpgradeModalOpen(true);
     } else {
@@ -195,17 +194,17 @@ export default function Home() {
   const handleUpgrade = () => {
     setIsSubscribed(true);
     setIsUpgradeModalOpen(false);
-    setModel('Vansh Ultra'); // Automatically switch to the first Pro model
+    setModel('Vansh Spectre'); // Automatically switch to the first Pro model
      toast({
         title: "Welcome to Lumi Pro! 💎",
-        description: "You've unlocked the most powerful models. Lumi is now powered by Vansh Ultra.",
+        description: "You've unlocked the most powerful models. Lumi is now powered by Vansh Spectre.",
       })
   }
 
   if (view === 'persona') {
     return (
       <PersonaSelection 
-        onSelectPersona={handlePersonaSelection} 
+        onSelectPersona={(p) => handlePersonaSelection(p)} 
         onCustomSubmit={handleCustomPersonaSubmit}
       />
     );
@@ -224,6 +223,7 @@ export default function Home() {
             onBack={handleBackToPersonaSelection}
             onModelChange={handleModelChange}
             isSubscribed={isSubscribed}
+            remainingMessages={isSubscribed ? Infinity : TRIAL_MESSAGE_LIMIT - userMessageCount}
           />
       </div>
       <UpgradeModal 

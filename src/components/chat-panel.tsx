@@ -24,7 +24,7 @@ const models = [
 ];
 
 const proModels = [
-  'Vansh Ultra',
+  'Vansh Spectre',
   'Vansh Phantom',
 ];
 
@@ -38,6 +38,7 @@ type ChatPanelProps = {
   onBack: () => void;
   onModelChange: (model: string) => void;
   isSubscribed: boolean;
+  remainingMessages: number;
 };
 
 export function ChatPanel({
@@ -50,6 +51,7 @@ export function ChatPanel({
   onBack,
   onModelChange,
   isSubscribed,
+  remainingMessages,
 }: ChatPanelProps) {
   const [input, setInput] = useState('');
   const scrollAreaRef = useRef<HTMLDivElement>(null);
@@ -162,8 +164,11 @@ export function ChatPanel({
             <span className="sr-only">Send</span>
           </Button>
         </form>
-         <footer className="pt-2 text-center text-sm text-muted-foreground">
-          made by vansh rabadiya
+         <footer className="pt-2 text-center text-xs text-muted-foreground">
+           {!isSubscribed && remainingMessages >= 0 && (
+            <p>You have {remainingMessages} messages left in your trial.</p>
+           )}
+           <p className="mt-1">made by vansh rabadiya</p>
         </footer>
       </div>
     </div>
