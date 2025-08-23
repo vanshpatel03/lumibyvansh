@@ -36,17 +36,17 @@ export async function getExpressiveSuggestions(emotionalState: string) {
   }
 }
 
-export async function createStripeCheckoutSession() {
+export async function createStripeCheckoutSession(): Promise<{ url: string | null; error?: string }> {
   const headersList = headers();
   const origin = headersList.get('origin');
   const stripe = getStripe();
 
   if (!origin) {
-    throw new Error('Could not determine origin');
+    return { url: null, error: 'Could not determine origin' };
   }
   
   if (!stripe) {
-    throw new Error('Stripe is not configured. Please add STRIPE_SECRET_KEY to your environment variables.');
+     return { url: null, error: 'Stripe is not configured. Please add STRIPE_SECRET_KEY to your environment variables.' };
   }
 
   try {
@@ -76,6 +76,6 @@ export async function createStripeCheckoutSession() {
     return { url: session.url };
   } catch (error) {
     console.error('Error creating Stripe Checkout session:', error);
-    throw new Error('Could not create checkout session');
+    return { url: null, error: 'Could not create checkout session' };
   }
 }

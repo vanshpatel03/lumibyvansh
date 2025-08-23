@@ -28,7 +28,10 @@ export function UpgradeModal({ isOpen, onOpenChange }: UpgradeModalProps) {
   const handleUpgrade = async () => {
     setIsLoading(true);
     try {
-      const { url } = await createStripeCheckoutSession();
+      const { url, error } = await createStripeCheckoutSession();
+      if (error) {
+        throw new Error(error);
+      }
       if (url) {
         window.location.href = url;
       } else {
@@ -36,11 +39,21 @@ export function UpgradeModal({ isOpen, onOpenChange }: UpgradeModalProps) {
       }
     } catch (error) {
       console.error(error);
-      toast({
-        variant: "destructive",
-        title: "Oh no, something went wrong.",
-        description: "We couldn't connect to our payment provider. Please try again later.",
-      });
+      const errorMessage = (error as Error).message;
+      
+      if (errorMessage.includes('Stripe is not configured')) {
+         toast({
+            variant: "destructive",
+            title: "Payments Not Configured",
+            description: "The Stripe API key is missing. Please add it to your environment variables.",
+          });
+      } else {
+        toast({
+          variant: "destructive",
+          title: "Oh no, something went wrong.",
+          description: "We couldn't connect to our payment provider. Please try again later.",
+        });
+      }
       setIsLoading(false);
     }
   };
