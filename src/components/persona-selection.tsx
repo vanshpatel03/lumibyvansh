@@ -57,7 +57,7 @@ export function PersonaSelection({ onSelectPersona, onCustomSubmit }: PersonaSel
       <main className="flex-1 flex items-center justify-center w-full">
         <Card className="w-full max-w-2xl mx-4 border-0 md:border md:bg-card/50 shadow-2xl">
           <CardHeader className="text-center">
-            <CardTitle className="text-4xl md:text-5xl font-bold font-headline tracking-tight">Welcome to LUMI</CardTitle>
+            <CardTitle className="text-4xl md:text-5xl font-bold font-headline tracking-tight whitespace-nowrap">Welcome to LUMI</CardTitle>
             <CardDescription className="text-lg md:text-xl">Choose your companion</CardDescription>
           </CardHeader>
           <CardContent>
