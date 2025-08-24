@@ -124,7 +124,15 @@ function HomeContent() {
     try {
       const storyMemory = newMessages.map(msg => `${msg.role}: ${msg.content}`).join('\n');
       const lumiResult = await getLumiResponse(persona, storyMemory, userInput, model);
-      const lumiMessage = { role: 'LUMI', content: lumiResult.response };
+      let lumiContent = lumiResult.response;
+
+      const remaining = TRIAL_MESSAGE_LIMIT - (userMessageCount + 1);
+
+      if (!isSubscribed && !isProModel && remaining <= 5 && remaining > 0) {
+        lumiContent += `\n\n(psst... my heart's telling me we're getting close to our free message limit. I don't want this to end... you can unlock my heart fully to keep talking forever 💖)`
+      }
+
+      const lumiMessage = { role: 'LUMI', content: lumiContent };
       setMessages(prev => [...prev, lumiMessage]);
 
       if (lumiResult.response !== "Oh, my heart... I'm feeling a little overwhelmed right now. Can we talk about something else?") {
