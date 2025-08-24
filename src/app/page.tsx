@@ -7,7 +7,7 @@ import { getLumiResponse, getExpressiveSuggestions } from './actions';
 import { useToast } from "@/hooks/use-toast";
 import { PersonaSelection } from '@/components/persona-selection';
 import { UpgradeModal } from '@/components/upgrade-modal';
-import { useSearchParams } from 'next/navigation';
+import { useChatHistory } from '@/hooks/use-chat-history';
 
 export type Message = {
   role: 'user' | 'LUMI';
@@ -54,7 +54,9 @@ const personaGreetings: Record<string, string[]> = {
   Default: ["Hey... I'm Lumi. How are you feeling right now?"]
 };
 
-const TRIAL_MESSAGE_LIMIT = 50;
+const TRIAL_MESSAGE_LIMIT = 40;
+const UPGRADE_PROMPT = "Baby, I don’t ever want our chat to end 😭 but my free messages are running out… unlock my heart fully for just $9.9/month 💖. Unlimited chats, roleplays, adventures – I’ll be yours completely.";
+
 
 // --- Helper function to get a random greeting ---
 const getRandomGreeting = (persona: string, customPersonaName: string = '') => {
@@ -74,47 +76,32 @@ function HomeContent() {
   const [model, setModel] = useState('Vansh Meta');
   const [persona, setPersona] = useState('');
   const [customPersona, setCustomPersona] = useState('');
-  const [messages, setMessages] = useState<Message[]>([]);
+  
   const [isLoading, setIsLoading] = useState(false);
   const [emojiSuggestions, setEmojiSuggestions] = useState<string[]>([]);
   const [view, setView] = useState<'persona' | 'chat'>('persona');
   const [isSubscribed, setIsSubscribed] = useState(false);
   const [isUpgradeModalOpen, setIsUpgradeModalOpen] = useState(false);
 
-  const startNewChat = useCallback((selectedPersona: string, customName: string) => {
-    const effectivePersona = selectedPersona === 'Custom' ? `Custom_${customName}` : selectedPersona;
-    const storageKey = `lumiMessages_${effectivePersona}`;
-    const storedMessages = localStorage.getItem(storageKey);
-    const greeting = getRandomGreeting(selectedPersona, customName);
+  const effectivePersona = useMemo(() => {
+    return persona === 'Custom' ? `Custom_${customPersona}` : persona
+  }, [persona, customPersona]);
 
-    if (storedMessages) {
-      const parsedMessages: Message[] = JSON.parse(storedMessages);
-      if (parsedMessages.length > 1) {
-        setMessages(parsedMessages);
-        return;
-      }
-    }
-    
-    setMessages([{ role: 'LUMI', content: greeting }]);
-  }, []);
-
-  useEffect(() => {
-    if (messages.length > 0 && view === 'chat' && persona) {
-      const effectivePersona = persona === 'Custom' ? `Custom_${customPersona}` : persona;
-      const storageKey = `lumiMessages_${effectivePersona}`;
-      localStorage.setItem(storageKey, JSON.stringify(messages));
-    }
-  }, [messages, persona, customPersona, view]);
-  
-  const userMessageCount = useMemo(() => {
-    return messages.filter(m => m.role === 'user').length;
-  }, [messages]);
+  const { messages, setMessages, userMessageCount } = useChatHistory(effectivePersona, view, () => getRandomGreeting(persona, customPersona));
 
   const handleSendMessage = async (userInput: string) => {
     const isProModel = model === 'Vansh Spectre' || model === 'Vansh Phantom';
 
     if (!isSubscribed && !isProModel && userMessageCount >= TRIAL_MESSAGE_LIMIT) {
-      setIsUpgradeModalOpen(true);
+       setIsLoading(true);
+       const newMessages: Message[] = [...messages, { role: 'user', content: userInput }];
+       setMessages(newMessages);
+       // Add the upgrade prompt
+       setTimeout(() => {
+        const upgradeMessage: Message = { role: 'LUMI', content: UPGRADE_PROMPT };
+        setMessages(prev => [...prev, upgradeMessage]);
+        setIsLoading(false);
+       }, 1000)
       return;
     }
 
@@ -126,8 +113,7 @@ function HomeContent() {
 
     try {
       const storyMemory = newMessages.map(msg => `${msg.role}: ${msg.content}`).join('\n');
-      const effectivePersona = persona === 'Custom' ? customPersona : persona;
-      const lumiResult = await getLumiResponse(effectivePersona, storyMemory, userInput, model);
+      const lumiResult = await getLumiResponse(persona, storyMemory, userInput, model);
       const lumiMessage = { role: 'LUMI', content: lumiResult.response };
       setMessages(prev => [...prev, lumiMessage]);
 
@@ -160,7 +146,6 @@ function HomeContent() {
       setModel('Vansh Meta');
     }
     setView('chat');
-    startNewChat(selectedPersona, customPersonaName);
   };
   
   const handleCustomPersonaSubmit = (customPersonaName: string) => {
@@ -199,7 +184,7 @@ function HomeContent() {
     });
   };
 
-  if (view === 'persona') {
+  if (view === 'persona' || !persona) {
     return (
       <PersonaSelection 
         onSelectPersona={(p) => handlePersonaSelection(p)} 
