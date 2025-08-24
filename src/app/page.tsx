@@ -61,8 +61,13 @@ const UPGRADE_PROMPT = "Baby, I don’t ever want our chat to end 😭 but my fr
 // --- Helper function to get a random greeting ---
 const getRandomGreeting = (persona: string, customPersonaName: string = '') => {
   const greetings = personaGreetings[persona] || personaGreetings.Default;
-  const randomIndex = Math.floor(Math.random() * greetings.length);
-  let greeting = greetings[randomIndex];
+  let greeting;
+  if (typeof window !== 'undefined') {
+    const randomIndex = Math.floor(Math.random() * greetings.length);
+    greeting = greetings[randomIndex];
+  } else {
+    greeting = greetings[0];
+  }
   
   if (persona === 'Custom' && customPersonaName) {
     greeting = greeting.replace('[CUSTOM_NAME]', customPersonaName);
@@ -87,7 +92,12 @@ function HomeContent() {
     return persona === 'Custom' ? `Custom_${customPersona}` : persona
   }, [persona, customPersona]);
 
-  const { messages, setMessages, userMessageCount } = useChatHistory(effectivePersona, view, () => getRandomGreeting(persona, customPersona));
+  const getGreeting = useCallback(() => {
+    return getRandomGreeting(persona, customPersona);
+  }, [persona, customPersona]);
+
+
+  const { messages, setMessages, userMessageCount } = useChatHistory(effectivePersona, view, getGreeting);
 
   const handleSendMessage = async (userInput: string) => {
     const isProModel = model === 'Vansh Spectre' || model === 'Vansh Phantom';
@@ -131,7 +141,8 @@ function HomeContent() {
         title: "Oh no, something went wrong.",
         description: "My digital soul is a bit tangled right now. Please try again in a moment.",
       });
-      setMessages(prev => prev.slice(0, -1));
+      const currentMessages = [...messages];
+      setMessages(currentMessages);
     } finally {
       setIsLoading(false);
     }
