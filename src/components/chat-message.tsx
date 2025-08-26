@@ -16,15 +16,12 @@ export function ChatMessage({ message }: { message: Message }) {
   const handlePlayAudio = async () => {
     if (audioState === 'loading') return;
     
-    // If we have audio and it's paused, play it.
     if (audio && audio.paused) {
       audio.play();
       return;
     }
 
-    // If we are already playing, do nothing
     if (audio && !audio.paused) {
-      // Optional: Or maybe pause it? For now, do nothing.
       return;
     }
 
@@ -70,7 +67,7 @@ export function ChatMessage({ message }: { message: Message }) {
   return (
     <div
       className={cn(
-        'flex items-start gap-3',
+        'group flex items-start gap-3 w-full',
         isLumi ? 'justify-start' : 'justify-end'
       )}
     >
@@ -83,31 +80,33 @@ export function ChatMessage({ message }: { message: Message }) {
       )}
       <div
         className={cn(
-          'max-w-xs md:max-w-md lg:max-w-xl p-3 rounded-2xl shadow-sm group relative',
+          'max-w-xs md:max-w-md lg:max-w-xl p-3 rounded-2xl shadow-sm relative',
           isLumi
             ? 'bg-muted rounded-tl-none'
             : 'bg-primary text-primary-foreground rounded-tr-none'
         )}
       >
         <p className="text-base leading-relaxed whitespace-pre-wrap">{message.content}</p>
-         {isLumi && (
-            <Button
-              size="icon"
-              variant="ghost"
-              className="absolute -right-11 top-1/2 -translate-y-1/2 h-8 w-8 rounded-full opacity-0 group-hover:opacity-100 transition-opacity"
-              onClick={handlePlayAudio}
-              disabled={audioState === 'loading'}
-            >
-              <AudioIcon />
-            </Button>
-          )}
       </div>
+       {isLumi && (
+        <Button
+          size="icon"
+          variant="ghost"
+          className="h-8 w-8 rounded-full opacity-0 group-hover:opacity-100 transition-opacity self-center"
+          onClick={handlePlayAudio}
+          disabled={audioState === 'loading'}
+        >
+          <AudioIcon />
+        </Button>
+      )}
        {!isLumi && (
-        <Avatar className="h-9 w-9">
-            <AvatarFallback className="bg-muted-foreground/50 text-background">
-                U
-            </AvatarFallback>
-        </Avatar>
+         <div className="flex items-center">
+            <Avatar className="h-9 w-9">
+                <AvatarFallback className="bg-muted-foreground/50 text-background">
+                    U
+                </AvatarFallback>
+            </Avatar>
+        </div>
       )}
     </div>
   );
