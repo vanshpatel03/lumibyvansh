@@ -3,13 +3,13 @@ import { initializeApp, getApps, getApp } from "firebase/app";
 import { getAuth, GoogleAuthProvider } from "firebase/auth";
 
 const firebaseConfig = {
-  "projectId": "lumi-by-vansh",
-  "appId": "1:996632146856:web:df69b3303457dec225e39d",
-  "storageBucket": "lumi-by-vansh.firebasestorage.app",
-  "apiKey": "AIzaSyBLLHiZa9Ix70TnqSThHud_DTTlbindVY4",
-  "authDomain": "lumi-by-vansh.firebaseapp.com",
-  "measurementId": "",
-  "messagingSenderId": "996632146856"
+  apiKey: process.env.NEXT_PUBLIC_FIREBASE_API_KEY,
+  authDomain: process.env.NEXT_PUBLIC_FIREBASE_AUTH_DOMAIN,
+  projectId: process.env.NEXT_PUBLIC_FIREBASE_PROJECT_ID,
+  storageBucket: process.env.NEXT_PUBLIC_FIREBASE_STORAGE_BUCKET,
+  messagingSenderId: process.env.NEXT_PUBLIC_FIREBASE_MESSAGING_SENDER_ID,
+  appId: process.env.NEXT_PUBLIC_FIREBASE_APP_ID,
+  measurementId: process.env.NEXT_PUBLIC_FIREBASE_MEASUREMENT_ID,
 };
 
 // Initialize Firebase
