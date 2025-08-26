@@ -92,7 +92,7 @@ export function ChatPanel({
 
   const ModelSelector = () => (
     <Select onValueChange={onModelChange} value={model}>
-        <SelectTrigger className="w-auto h-auto px-3 py-1 text-xs sm:text-sm sm:h-10 sm:px-3 sm:py-2 md:w-[150px] shrink-0 border-2 border-primary/50 font-semibold">
+        <SelectTrigger className="w-full md:w-[180px] shrink-0 border-2 border-primary/50 font-semibold">
           <SelectValue>Select Model</SelectValue>
         </SelectTrigger>
         <SelectContent>
@@ -135,7 +135,6 @@ export function ChatPanel({
             </div>
           </div>
           <div className="flex items-center gap-2">
-            <ModelSelector />
             <AuthButton />
           </div>
       </header>
@@ -156,21 +155,24 @@ export function ChatPanel({
       </ScrollArea>
       <div className="p-4 border-t bg-card/50 shrink-0">
         <EmojiSuggestions emojis={emojiSuggestions} onSelect={handleEmojiSelect} />
-        <form onSubmit={handleSubmit} className="flex items-start gap-2">
+        <form onSubmit={handleSubmit} className="flex flex-col md:flex-row items-start gap-2">
+           <div className="w-full md:w-auto md:order-2">
+             <ModelSelector />
+           </div>
           <Textarea
             value={input}
             onChange={(e) => setInput(e.target.value)}
             onKeyDown={handleKeyDown}
             placeholder="Talk to me..."
             rows={1}
-            className="flex-1 resize-none bg-muted focus-visible:ring-1 focus-visible:ring-ring"
+            className="flex-1 resize-none bg-muted focus-visible:ring-1 focus-visible:ring-ring md:order-1"
             disabled={isLoading}
           />
           <Button
             type="submit"
             size="icon"
             disabled={isLoading || !input.trim()}
-            className="rounded-full shrink-0 aspect-square"
+            className="rounded-full shrink-0 aspect-square self-end md:order-3"
           >
             <SendHorizonal className="h-5 w-5" />
             <span className="sr-only">Send</span>
