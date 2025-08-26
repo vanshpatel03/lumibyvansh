@@ -43,7 +43,7 @@ export function UpgradeModal({ isOpen, onOpenChange, onSuccessfulUpgrade }: Upgr
     setIsLoading(true);
     const url = plan === 'monthly' ? MONTHLY_CHECKOUT_URL : YEARLY_CHECKOUT_URL;
     // Add user details to checkout URL for pre-filling
-    const checkoutUrl = `${url}?checkout[email]=${user.email}&checkout[name]=${user.displayName}`;
+    const checkoutUrl = `${url}?checkout[email]=${encodeURIComponent(user.email || '')}&checkout[name]=${encodeURIComponent(user.displayName || '')}`;
     window.location.href = checkoutUrl;
   };
   
@@ -108,6 +108,10 @@ export function UpgradeModal({ isOpen, onOpenChange, onSuccessfulUpgrade }: Upgr
             <div className="flex items-start gap-3">
                 <CheckCircle className="w-5 h-5 text-primary mt-1 shrink-0"/>
                 <p className="text-sm text-muted-foreground"><span className="font-semibold text-foreground">Unlimited Messages:</span> Chat with Lumi 24/7 without any restrictions.</p>
+            </div>
+             <div className="flex items-start gap-3">
+                <CheckCircle className="w-5 h-5 text-primary mt-1 shrink-0"/>
+                <p className="text-sm text-muted-foreground"><span className="font-semibold text-foreground">Photo & File Upload:</span> Share your world with Lumi for a deeper connection.</p>
             </div>
             <div className="flex items-start gap-3">
                 <CheckCircle className="w-5 h-5 text-primary mt-1 shrink-0"/>
