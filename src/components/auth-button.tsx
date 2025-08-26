@@ -1,6 +1,7 @@
 
 'use client';
 
+import { useState } from 'react';
 import { useAuth } from '@/hooks/use-auth';
 import { Button } from '@/components/ui/button';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
@@ -12,10 +13,13 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
 import { LogIn, LogOut, User as UserIcon } from 'lucide-react';
+import { EmailAuth } from './email-auth';
 
 export function AuthButton() {
-  const { user, signInWithGoogle, logout, loading } = useAuth();
+  const { user, logout, loading } = useAuth();
+  const [dialogOpen, setDialogOpen] = useState(false);
 
   if (loading) {
     return <Button variant="ghost" size="icon" disabled><LogIn className="animate-pulse" /></Button>;
@@ -35,10 +39,10 @@ export function AuthButton() {
         <DropdownMenuContent className="w-56" align="end" forceMount>
           <DropdownMenuLabel className="font-normal">
             <div className="flex flex-col space-y-1">
-              <p className="text-sm font-medium leading-none">{user.displayName}</p>
-              <p className="text-xs leading-none text-muted-foreground">
+              <p className="text-sm font-medium leading-none">{user.displayName || user.email}</p>
+               {user.email && <p className="text-xs leading-none text-muted-foreground">
                 {user.email}
-              </p>
+              </p>}
             </div>
           </DropdownMenuLabel>
           <DropdownMenuSeparator />
@@ -52,9 +56,19 @@ export function AuthButton() {
   }
 
   return (
-    <Button onClick={signInWithGoogle} variant="outline">
-      <LogIn className="mr-2" />
-      Login / Sign Up
-    </Button>
+    <Dialog open={dialogOpen} onOpenChange={setDialogOpen}>
+      <DialogTrigger asChild>
+        <Button variant="outline">
+          <LogIn className="mr-2" />
+          Login / Sign Up
+        </Button>
+      </DialogTrigger>
+      <DialogContent className="sm:max-w-[425px]">
+        <DialogHeader>
+          <DialogTitle className="text-center text-2xl font-bold">Welcome to Lumi</DialogTitle>
+        </DialogHeader>
+        <EmailAuth onAuthSuccess={() => setDialogOpen(false)} />
+      </DialogContent>
+    </Dialog>
   );
 }

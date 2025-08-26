@@ -2,14 +2,17 @@
 'use client';
 
 import { useState, useEffect, createContext, useContext, ReactNode } from 'react';
-import { User, onAuthStateChanged, signInWithPopup, signOut } from 'firebase/auth';
-import { auth, googleProvider } from '@/lib/firebase';
+import { User, onAuthStateChanged, signInWithEmailAndPassword, createUserWithEmailAndPassword, signOut } from 'firebase/auth';
+import { auth } from '@/lib/firebase';
 import { useToast } from './use-toast';
+import type { AuthFormValues } from '@/components/email-auth';
+
 
 type AuthContextType = {
   user: User | null;
   loading: boolean;
-  signInWithGoogle: () => Promise<void>;
+  signInWithEmail: (data: AuthFormValues) => Promise<void>;
+  signUpWithEmail: (data: AuthFormValues) => Promise<void>;
   logout: () => Promise<void>;
 };
 
@@ -28,16 +31,25 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     return () => unsubscribe();
   }, []);
 
-  const signInWithGoogle = async () => {
+  const signInWithEmail = async ({ email, password }: AuthFormValues) => {
     try {
-      setLoading(true);
-      await signInWithPopup(auth, googleProvider);
-      toast({ title: "Welcome!", description: "You've successfully signed in." });
-    } catch (error) {
-      console.error("Error signing in with Google: ", error);
-      toast({ variant: "destructive", title: "Sign In Failed", description: "Could not sign in with Google. Please try again." });
-    } finally {
-        setLoading(false);
+      await signInWithEmailAndPassword(auth, email, password);
+      toast({ title: "Welcome back!", description: "You've successfully signed in." });
+    } catch (error: any) {
+      console.error("Error signing in with email: ", error);
+      toast({ variant: "destructive", title: "Sign In Failed", description: error.message || "Could not sign in. Please check your credentials." });
+      throw error; // Re-throw to be caught by form handler
+    }
+  };
+
+  const signUpWithEmail = async ({ email, password }: AuthFormValues) => {
+    try {
+      await createUserWithEmailAndPassword(auth, email, password);
+      toast({ title: "Welcome!", description: "Your account has been created successfully." });
+    } catch (error: any) {
+      console.error("Error signing up with email: ", error);
+      toast({ variant: "destructive", title: "Sign Up Failed", description: error.message || "Could not create an account. Please try again." });
+      throw error; // Re-throw to be caught by form handler
     }
   };
 
@@ -45,17 +57,17 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     try {
       await signOut(auth);
       toast({ title: "Signed Out", description: "You've been successfully signed out." });
-    } catch (error) {
+    } catch (error: any) {
       console.error("Error signing out: ", error);
-      toast({ variant: "destructive", title: "Sign Out Failed", description: "Could not sign out. Please try again." });
+      toast({ variant: "destructive", title: "Sign Out Failed", description: error.message || "Could not sign out. Please try again." });
     }
   };
 
-  const value = { user, loading, signInWithGoogle, logout };
+  const value = { user, loading, signInWithEmail, signUpWithEmail, logout };
 
   return (
     <AuthContext.Provider value={value}>
-      {!loading && children}
+      {children}
     </AuthContext.Provider>
   );
 }
