@@ -2,7 +2,7 @@ import { useState } from 'react';
 import { cn } from '@/lib/utils';
 import { Avatar, AvatarFallback } from '@/components/ui/avatar';
 import { Button } from '@/components/ui/button';
-import { Volume2, Loader2, Play } from 'lucide-react';
+import { Volume2, Loader2 } from 'lucide-react';
 import type { Message } from '@/app/page';
 import { getAudioForText } from '@/app/actions';
 import { useToast } from '@/hooks/use-toast';
@@ -24,6 +24,7 @@ export function ChatMessage({ message }: { message: Message }) {
 
     // If we are already playing, do nothing
     if (audio && !audio.paused) {
+      // Optional: Or maybe pause it? For now, do nothing.
       return;
     }
 
