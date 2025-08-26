@@ -12,6 +12,7 @@ import {
 import { Button } from '@/components/ui/button';
 import { cn } from '@/lib/utils';
 import { Textarea } from '@/components/ui/textarea';
+import { ThemeToggle } from './theme-toggle';
 
 const personas = [
   'Girlfriend',
@@ -51,6 +52,9 @@ export function PersonaSelection({ onSelectPersona, onCustomSubmit }: PersonaSel
 
   return (
     <div className="flex flex-col items-center justify-center min-h-screen bg-background text-foreground font-body p-4">
+      <div className="absolute top-4 right-4">
+        <ThemeToggle />
+      </div>
       <header className="w-full py-4 text-center text-base text-muted-foreground">
         made by vansh rabadiya
       </header>
