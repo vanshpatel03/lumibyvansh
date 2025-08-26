@@ -18,6 +18,7 @@ import { EmojiSuggestions } from './emoji-suggestions';
 import type { Message } from '@/app/page';
 import { cn } from '@/lib/utils';
 import { AuthButton } from './auth-button';
+import { VoiceInput } from './voice-input';
 
 
 const models = [
@@ -89,6 +90,10 @@ export function ChatPanel({
       handleSubmit(e as unknown as FormEvent<HTMLFormElement>);
     }
   };
+  
+  const handleTranscription = (transcript: string) => {
+    setInput(prev => prev + transcript);
+  }
 
   const ModelSelector = () => (
     <Select onValueChange={onModelChange} value={model}>
@@ -166,6 +171,7 @@ export function ChatPanel({
                 className="flex-1 resize-none bg-muted focus-visible:ring-1 focus-visible:ring-ring"
                 disabled={isLoading}
               />
+              <VoiceInput onTranscription={handleTranscription} disabled={isLoading} />
               <Button
                 type="submit"
                 size="icon"

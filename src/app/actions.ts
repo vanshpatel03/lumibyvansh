@@ -4,6 +4,7 @@
 import { adaptPersona } from '@/ai/flows/persona-adaption';
 import { generateExpressiveSuggestions } from '@/ai/flows/expressive-ui';
 import { textToSpeech } from '@/ai/flows/text-to-speech';
+import { speechToText } from '@/ai/flows/speech-to-text';
 
 export async function getLumiResponse(
   persona: string,
@@ -42,5 +43,15 @@ export async function getAudioForText(text: string) {
   } catch (error) {
     console.error('Error in getAudioForText:', error);
     return { audioDataUri: '' };
+  }
+}
+
+export async function getTextFromAudio(audioDataUri: string) {
+  try {
+    const result = await speechToText(audioDataUri);
+    return result;
+  } catch (error) {
+    console.error('Error in getTextFromAudio:', error);
+    return { transcript: '' };
   }
 }
