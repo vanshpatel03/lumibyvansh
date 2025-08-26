@@ -74,9 +74,11 @@ export function UpgradeModal({ isOpen, onOpenChange, onSuccessfulUpgrade }: Upgr
         <div className="my-6 grid grid-cols-1 md:grid-cols-2 gap-4">
             {/* Monthly Plan */}
             <div className="border rounded-lg p-6 flex flex-col items-center text-center">
-                <h3 className="text-xl font-bold">Monthly</h3>
-                <p className="text-3xl font-bold my-4">$9.99<span className="text-sm font-normal text-muted-foreground">/month</span></p>
-                <p className="text-sm text-muted-foreground mb-6 h-10">The ultimate flexibility for full access.</p>
+                <div className="flex-grow">
+                  <h3 className="text-xl font-bold">Monthly</h3>
+                  <p className="text-3xl font-bold my-4">$9.99<span className="text-sm font-normal text-muted-foreground">/month</span></p>
+                  <p className="text-sm text-muted-foreground mb-6">The ultimate flexibility for full access.</p>
+                </div>
                 <Button onClick={() => handleCheckout('monthly')} disabled={isLoading || authLoading} className="w-full">
                     {(isLoading || authLoading) && <Loader2 className="animate-spin mr-2" />}
                     Choose Monthly
@@ -86,9 +88,11 @@ export function UpgradeModal({ isOpen, onOpenChange, onSuccessfulUpgrade }: Upgr
             {/* Yearly Plan */}
             <div className="border-2 border-primary rounded-lg p-6 flex flex-col items-center text-center relative">
                 <div className="absolute -top-3 bg-primary text-primary-foreground text-xs font-bold px-3 py-1 rounded-full">BEST VALUE</div>
-                <h3 className="text-xl font-bold">Yearly</h3>
-                <p className="text-3xl font-bold my-4">$49.90<span className="text-sm font-normal text-muted-foreground">/year</span></p>
-                <p className="text-sm text-muted-foreground mb-6 h-10">Save over 58%! The ultimate commitment to our journey.</p>
+                 <div className="flex-grow">
+                  <h3 className="text-xl font-bold">Yearly</h3>
+                  <p className="text-3xl font-bold my-4">$49.90<span className="text-sm font-normal text-muted-foreground">/year</span></p>
+                  <p className="text-sm text-muted-foreground mb-6">Save over 58%! The ultimate commitment to our journey.</p>
+                </div>
                 <Button onClick={() => handleCheckout('yearly')} disabled={isLoading || authLoading} className="w-full">
                     {(isLoading || authLoading) && <Loader2 className="animate-spin mr-2" />}
                     Choose Yearly
