@@ -237,6 +237,7 @@ function HomeContent() {
             isSubscribed={isSubscribed}
             remainingMessages={remainingMessages}
             trialMessageLimit={TRIAL_MESSAGE_LIMIT}
+            onUpgradeClick={() => setIsUpgradeModalOpen(true)}
           />
       </div>
       <UpgradeModal 

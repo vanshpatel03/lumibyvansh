@@ -3,7 +3,7 @@ import { useState } from 'react';
 import { cn } from '@/lib/utils';
 import { Avatar, AvatarFallback } from '@/components/ui/avatar';
 import { Button } from '@/components/ui/button';
-import { Volume2, Loader2 } from 'lucide-react';
+import { Volume2, Loader2, FileText } from 'lucide-react';
 import type { Message } from '@/app/page';
 import { getAudioForText } from '@/app/actions';
 import { useToast } from '@/hooks/use-toast';
@@ -65,6 +65,30 @@ export function ChatMessage({ message }: { message: Message }) {
         return <Volume2 />;
     }
   };
+  
+  const AttachmentContent = () => {
+    if (!message.attachment) return null;
+
+    if (message.attachment.type.startsWith('image/')) {
+        return (
+          <Image
+            src={message.attachment.url}
+            alt="User attachment"
+            width={300}
+            height={300}
+            className="rounded-lg mb-2"
+          />
+        );
+    }
+    
+    // Fallback for other file types
+    return (
+        <div className="flex items-center gap-2 bg-muted/50 p-2 rounded-md mb-2">
+            <FileText className="w-6 h-6" />
+            <span className="text-sm truncate">Attached file</span>
+        </div>
+    );
+  }
 
   return (
     <div
@@ -88,15 +112,7 @@ export function ChatMessage({ message }: { message: Message }) {
             : 'bg-primary text-primary-foreground rounded-tr-none'
         )}
       >
-        {message.attachment?.type.startsWith('image/') && (
-          <Image
-            src={message.attachment.url}
-            alt="User attachment"
-            width={300}
-            height={300}
-            className="rounded-lg mb-2"
-          />
-        )}
+        <AttachmentContent />
         <p className="text-base leading-relaxed whitespace-pre-wrap">{message.content}</p>
       </div>
        {isLumi && (

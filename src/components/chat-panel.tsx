@@ -12,7 +12,7 @@ import {
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { Textarea } from '@/components/ui/textarea';
 import { Button } from '@/components/ui/button';
-import { SendHorizonal, BrainCircuit, ArrowLeft, Sparkles, Paperclip, X } from 'lucide-react';
+import { SendHorizonal, BrainCircuit, ArrowLeft, Sparkles, Paperclip, X, Lock } from 'lucide-react';
 import { ChatMessage } from './chat-message';
 import { EmojiSuggestions } from './emoji-suggestions';
 import type { Message } from '@/app/page';
@@ -45,6 +45,7 @@ type ChatPanelProps = {
   isSubscribed: boolean;
   remainingMessages: number;
   trialMessageLimit: number;
+  onUpgradeClick: () => void;
 };
 
 export function ChatPanel({
@@ -59,6 +60,7 @@ export function ChatPanel({
   isSubscribed,
   remainingMessages,
   trialMessageLimit,
+  onUpgradeClick,
 }: ChatPanelProps) {
   const [input, setInput] = useState('');
   const [attachment, setAttachment] = useState<{ url: string; type: string; file: File } | null>(null);
@@ -98,6 +100,14 @@ export function ChatPanel({
       reader.readAsDataURL(file);
     }
   };
+  
+  const handleAttachmentClick = () => {
+      if (!isSubscribed) {
+          onUpgradeClick();
+          return;
+      }
+      fileInputRef.current?.click();
+  }
 
   const handleSubmit = async (e: FormEvent<HTMLFormElement>) => {
     e.preventDefault();
@@ -198,7 +208,7 @@ export function ChatPanel({
         {attachment && (
           <div className="relative w-24 h-24 mb-2 rounded-md overflow-hidden border">
             {attachment.type.startsWith('image/') ? (
-              <Image src={attachment.url} alt="Attachment preview" layout="fill" objectFit="cover" />
+              <Image src={attachment.url} alt="Attachment preview" fill objectFit="cover" />
             ) : (
               <div className="flex flex-col items-center justify-center h-full bg-muted p-2 text-center">
                 <Paperclip className="w-6 h-6" />
@@ -221,12 +231,11 @@ export function ChatPanel({
         <form onSubmit={handleSubmit} className="flex flex-col items-start gap-2">
            <div className="flex w-full items-start gap-2">
               <input type="file" ref={fileInputRef} onChange={handleAttachmentChange} className="hidden" accept="image/*,application/pdf,.doc,.docx,.txt" />
-              {isSubscribed && (
-                  <Button type="button" size="icon" variant="outline" onClick={() => fileInputRef.current?.click()} disabled={isLoading} className="self-end">
-                      <Paperclip />
-                      <span className="sr-only">Attach file</span>
-                  </Button>
-              )}
+              <Button type="button" size="icon" variant="outline" onClick={handleAttachmentClick} disabled={isLoading} className="self-end relative">
+                  <Paperclip />
+                  {!isSubscribed && <Lock className="w-3 h-3 absolute -bottom-1 -right-1 bg-background text-foreground rounded-full p-0.5" />}
+                  <span className="sr-only">Attach file</span>
+              </Button>
              <Textarea
                 value={input}
                 onChange={(e) => setInput(e.target.value)}
