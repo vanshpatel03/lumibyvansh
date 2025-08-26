@@ -3,6 +3,7 @@
 
 import { adaptPersona } from '@/ai/flows/persona-adaption';
 import { generateExpressiveSuggestions } from '@/ai/flows/expressive-ui';
+import { textToSpeech } from '@/ai/flows/text-to-speech';
 
 export async function getLumiResponse(
   persona: string,
@@ -31,5 +32,15 @@ export async function getExpressiveSuggestions(emotionalState: string) {
   } catch (error) {
     console.error('Error in getExpressiveSuggestions:', error);
     return { emojiSuggestions: [], imageSuggestion: undefined };
+  }
+}
+
+export async function getAudioForText(text: string) {
+  try {
+    const result = await textToSpeech(text);
+    return result;
+  } catch (error) {
+    console.error('Error in getAudioForText:', error);
+    return { audioDataUri: '' };
   }
 }
