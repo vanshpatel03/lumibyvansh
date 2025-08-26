@@ -135,9 +135,7 @@ export function ChatPanel({
             </div>
           </div>
           <div className="flex items-center gap-2">
-            <div className="hidden md:block">
-              <ModelSelector />
-            </div>
+            <ModelSelector />
             <AuthButton />
           </div>
       </header>
@@ -168,9 +166,6 @@ export function ChatPanel({
             className="flex-1 resize-none bg-muted focus-visible:ring-1 focus-visible:ring-ring"
             disabled={isLoading}
           />
-          <div className="md:hidden">
-            <ModelSelector />
-          </div>
           <Button
             type="submit"
             size="icon"
