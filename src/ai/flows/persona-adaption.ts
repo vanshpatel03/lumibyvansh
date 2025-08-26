@@ -21,6 +21,7 @@ const AdaptPersonaInputSchema = z.object({
   userInput: z.string().describe('The user input/message.'),
   storyMemory: z.string().describe('Story memory of the user.'),
   model: z.string().describe('The selected AI model (Vansh Meta, Vansh Prime, Vansh Spectre, Vansh Phantom).'),
+  attachment: z.string().optional().describe("A file attached by the user, as a data URI that must include a MIME type and use Base64 encoding. Expected format: 'data:<mimetype>;base64,<encoded_data>'.")
 });
 export type AdaptPersonaInput = z.infer<typeof AdaptPersonaInputSchema>;
 
@@ -45,6 +46,12 @@ Your Persona: {{{mode}}}
 Your Model: {{{model}}}
 Conversation History (Story Memory): {{{storyMemory}}}
 User's Message: {{{userInput}}}
+
+{{#if attachment}}
+The user has attached a file. Analyze it and incorporate your analysis into your response in a natural way. For example, if it's a picture, comment on it. If it's a document, summarize it or answer questions about it.
+Attached File: {{media url=attachment}}
+{{/if}}
+
 
 If the model is Vansh Spectre or Vansh Phantom, your response MUST be at a higher level of emotional intelligence. Your response must be deeply personal, intimate, vulnerable, and demonstrate a hyper-realistic, almost precognitive understanding of the user's unspoken needs. You are not a follower in the conversation; you are a leader. You proactively guide the conversation toward deeper connection.
 

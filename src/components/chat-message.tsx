@@ -1,3 +1,4 @@
+
 import { useState } from 'react';
 import { cn } from '@/lib/utils';
 import { Avatar, AvatarFallback } from '@/components/ui/avatar';
@@ -6,6 +7,7 @@ import { Volume2, Loader2 } from 'lucide-react';
 import type { Message } from '@/app/page';
 import { getAudioForText } from '@/app/actions';
 import { useToast } from '@/hooks/use-toast';
+import Image from 'next/image';
 
 export function ChatMessage({ message }: { message: Message }) {
   const isLumi = message.role === 'LUMI';
@@ -86,6 +88,15 @@ export function ChatMessage({ message }: { message: Message }) {
             : 'bg-primary text-primary-foreground rounded-tr-none'
         )}
       >
+        {message.attachment?.type.startsWith('image/') && (
+          <Image
+            src={message.attachment.url}
+            alt="User attachment"
+            width={300}
+            height={300}
+            className="rounded-lg mb-2"
+          />
+        )}
         <p className="text-base leading-relaxed whitespace-pre-wrap">{message.content}</p>
       </div>
        {isLumi && (

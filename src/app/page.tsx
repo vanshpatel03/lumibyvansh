@@ -13,6 +13,10 @@ import { useAuth } from '@/hooks/use-auth';
 export type Message = {
   role: 'user' | 'LUMI';
   content: string;
+  attachment?: {
+    url: string;
+    type: string;
+  };
 };
 
 // --- Persona-specific greeting variations ---
@@ -101,7 +105,7 @@ function HomeContent() {
 
   const { messages, setMessages, userMessageCount } = useChatHistory(effectivePersona, view, getGreeting);
 
-  const handleSendMessage = async (userInput: string) => {
+  const handleSendMessage = async (userInput: string, attachment?: { url: string; type: string; }) => {
     const isProModel = model === 'Vansh Spectre' || model === 'Vansh Phantom';
 
     if (!isSubscribed && userMessageCount >= TRIAL_MESSAGE_LIMIT) {
@@ -121,12 +125,12 @@ function HomeContent() {
     setIsLoading(true);
     setEmojiSuggestions([]);
     
-    const newMessages: Message[] = [...messages, { role: 'user', content: userInput }];
+    const newMessages: Message[] = [...messages, { role: 'user', content: userInput, attachment }];
     setMessages(newMessages);
 
     try {
       const storyMemory = newMessages.map(msg => `${msg.role}: ${msg.content}`).join('\n');
-      const lumiResult = await getLumiResponse(persona, storyMemory, userInput, model);
+      const lumiResult = await getLumiResponse(persona, storyMemory, userInput, model, attachment?.url);
       let lumiContent = lumiResult.response;
 
       const remaining = TRIAL_MESSAGE_LIMIT - (userMessageCount + 1);
@@ -152,8 +156,8 @@ function HomeContent() {
         title: "Oh no, something went wrong.",
         description: "My digital soul is a bit tangled right now. Please try again in a moment.",
       });
-      const currentMessages = [...messages];
-      setMessages(currentMessages);
+      // Revert optimistic update on failure
+      setMessages(messages)
     } finally {
       setIsLoading(false);
     }

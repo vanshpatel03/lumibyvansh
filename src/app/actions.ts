@@ -10,7 +10,8 @@ export async function getLumiResponse(
   persona: string,
   storyMemory: string,
   userInput: string,
-  model: string
+  model: string,
+  attachment?: string,
 ) {
   try {
     const result = await adaptPersona({
@@ -18,6 +19,7 @@ export async function getLumiResponse(
       userInput,
       storyMemory,
       model,
+      attachment,
     });
     return result;
   } catch (error) {

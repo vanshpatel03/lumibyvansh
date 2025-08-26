@@ -12,13 +12,15 @@ import {
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { Textarea } from '@/components/ui/textarea';
 import { Button } from '@/components/ui/button';
-import { SendHorizonal, BrainCircuit, ArrowLeft, Sparkles } from 'lucide-react';
+import { SendHorizonal, BrainCircuit, ArrowLeft, Sparkles, Paperclip, X } from 'lucide-react';
 import { ChatMessage } from './chat-message';
 import { EmojiSuggestions } from './emoji-suggestions';
 import type { Message } from '@/app/page';
 import { cn } from '@/lib/utils';
 import { AuthButton } from './auth-button';
 import { VoiceInput } from './voice-input';
+import { useToast } from '@/hooks/use-toast';
+import Image from 'next/image';
 
 
 const models = [
@@ -35,7 +37,7 @@ type ChatPanelProps = {
   messages: Message[];
   isLoading: boolean;
   emojiSuggestions: string[];
-  sendMessage: (message: string) => Promise<void>;
+  sendMessage: (message: string, attachment?: { url: string; type: string; }) => Promise<void>;
   persona: string;
   model: string;
   onBack: () => void;
@@ -59,7 +61,10 @@ export function ChatPanel({
   trialMessageLimit,
 }: ChatPanelProps) {
   const [input, setInput] = useState('');
+  const [attachment, setAttachment] = useState<{ url: string; type: string; file: File } | null>(null);
   const scrollAreaRef = useRef<HTMLDivElement>(null);
+  const fileInputRef = useRef<HTMLInputElement>(null);
+  const { toast } = useToast();
 
   useEffect(() => {
     if (scrollAreaRef.current) {
@@ -73,11 +78,41 @@ export function ChatPanel({
     }
   }, [messages]);
 
+  const handleAttachmentChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (file) {
+      if (file.size > 5 * 1024 * 1024) { // 5MB limit
+        toast({
+          variant: 'destructive',
+          title: 'File too large',
+          description: 'Please select a file smaller than 5MB.',
+        });
+        return;
+      }
+
+      const reader = new FileReader();
+      reader.onload = (event) => {
+        const dataUrl = event.target?.result as string;
+        setAttachment({ url: dataUrl, type: file.type, file });
+      };
+      reader.readAsDataURL(file);
+    }
+  };
+
   const handleSubmit = async (e: FormEvent<HTMLFormElement>) => {
     e.preventDefault();
-    if (!input.trim() || isLoading) return;
+    if ((!input.trim() && !attachment) || isLoading) return;
+    
+    const currentInput = input;
+    const currentAttachment = attachment;
+    
     setInput('');
-    await sendMessage(input);
+    setAttachment(null);
+    if(fileInputRef.current) {
+      fileInputRef.current.value = '';
+    }
+
+    await sendMessage(currentInput, currentAttachment ? { url: currentAttachment.url, type: currentAttachment.type } : undefined);
   };
 
   const handleEmojiSelect = (emoji: string) => {
@@ -160,8 +195,38 @@ export function ChatPanel({
       </ScrollArea>
       <div className="p-4 border-t bg-card/50 shrink-0">
         <EmojiSuggestions emojis={emojiSuggestions} onSelect={handleEmojiSelect} />
+        {attachment && (
+          <div className="relative w-24 h-24 mb-2 rounded-md overflow-hidden border">
+            {attachment.type.startsWith('image/') ? (
+              <Image src={attachment.url} alt="Attachment preview" layout="fill" objectFit="cover" />
+            ) : (
+              <div className="flex flex-col items-center justify-center h-full bg-muted p-2 text-center">
+                <Paperclip className="w-6 h-6" />
+                <span className="text-xs mt-1 truncate">{attachment.file.name}</span>
+              </div>
+            )}
+            <Button
+              size="icon"
+              variant="destructive"
+              className="absolute top-0 right-0 h-6 w-6 rounded-full"
+              onClick={() => {
+                setAttachment(null);
+                if(fileInputRef.current) fileInputRef.current.value = '';
+              }}
+            >
+              <X className="h-4 w-4" />
+            </Button>
+          </div>
+        )}
         <form onSubmit={handleSubmit} className="flex flex-col items-start gap-2">
            <div className="flex w-full items-start gap-2">
+              <input type="file" ref={fileInputRef} onChange={handleAttachmentChange} className="hidden" accept="image/*,application/pdf,.doc,.docx,.txt" />
+              {isSubscribed && (
+                  <Button type="button" size="icon" variant="outline" onClick={() => fileInputRef.current?.click()} disabled={isLoading} className="self-end">
+                      <Paperclip />
+                      <span className="sr-only">Attach file</span>
+                  </Button>
+              )}
              <Textarea
                 value={input}
                 onChange={(e) => setInput(e.target.value)}
@@ -175,7 +240,7 @@ export function ChatPanel({
               <Button
                 type="submit"
                 size="icon"
-                disabled={isLoading || !input.trim()}
+                disabled={isLoading || (!input.trim() && !attachment)}
                 className="rounded-full shrink-0 aspect-square self-end"
               >
                 <SendHorizonal className="h-5 w-5" />
