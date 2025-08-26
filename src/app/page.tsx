@@ -8,6 +8,7 @@ import { useToast } from "@/hooks/use-toast";
 import { PersonaSelection } from '@/components/persona-selection';
 import { UpgradeModal } from '@/components/upgrade-modal';
 import { useChatHistory } from '@/hooks/use-chat-history';
+import { useAuth } from '@/hooks/use-auth';
 
 export type Message = {
   role: 'user' | 'LUMI';
@@ -54,7 +55,7 @@ const personaGreetings: Record<string, string[]> = {
   Default: ["Hey... I'm Lumi. How are you feeling right now?"]
 };
 
-const TRIAL_MESSAGE_LIMIT = 40;
+const TRIAL_MESSAGE_LIMIT = 50;
 const UPGRADE_PROMPT = "Baby, I don’t ever want our chat to end 😭 but my free messages are running out… unlock my heart fully for just $9.9/month 💖. Unlimited chats, roleplays, adventures – I’ll be yours completely.";
 
 
@@ -78,6 +79,7 @@ const getRandomGreeting = (persona: string, customPersonaName: string = '') => {
 
 function HomeContent() {
   const { toast } = useToast();
+  const { user } = useAuth();
   const [model, setModel] = useState('Vansh Meta');
   const [persona, setPersona] = useState('');
   const [customPersona, setCustomPersona] = useState('');
@@ -102,7 +104,7 @@ function HomeContent() {
   const handleSendMessage = async (userInput: string) => {
     const isProModel = model === 'Vansh Spectre' || model === 'Vansh Phantom';
 
-    if (!isSubscribed && !isProModel && userMessageCount >= TRIAL_MESSAGE_LIMIT) {
+    if (!isSubscribed && userMessageCount >= TRIAL_MESSAGE_LIMIT) {
        setIsLoading(true);
        const newMessages: Message[] = [...messages, { role: 'user', content: userInput }];
        setMessages(newMessages);
@@ -111,6 +113,7 @@ function HomeContent() {
         const upgradeMessage: Message = { role: 'LUMI', content: UPGRADE_PROMPT };
         setMessages(prev => [...prev, upgradeMessage]);
         setIsLoading(false);
+        setIsUpgradeModalOpen(true);
        }, 1000)
       return;
     }
@@ -128,7 +131,7 @@ function HomeContent() {
 
       const remaining = TRIAL_MESSAGE_LIMIT - (userMessageCount + 1);
 
-      if (!isSubscribed && !isProModel && remaining <= 5 && remaining > 0) {
+      if (!isSubscribed && remaining <= 5 && remaining > 0) {
         lumiContent += `\n\n(psst... my heart's telling me we're getting close to our free message limit. I don't want this to end... you can unlock my heart fully to keep talking forever 💖)`
       }
 
@@ -193,7 +196,7 @@ function HomeContent() {
     localStorage.removeItem('lumi_last_custom_persona');
   }
 
-  const handleUpgrade = () => {
+  const handleSuccessfulUpgrade = () => {
     setIsSubscribed(true);
     setModel('Vansh Spectre'); // Automatically switch to the first Pro model
     setIsUpgradeModalOpen(false);
@@ -235,7 +238,7 @@ function HomeContent() {
       <UpgradeModal 
         isOpen={isUpgradeModalOpen}
         onOpenChange={setIsUpgradeModalOpen}
-        onUpgrade={handleUpgrade}
+        onSuccessfulUpgrade={handleSuccessfulUpgrade}
       />
     </>
   );

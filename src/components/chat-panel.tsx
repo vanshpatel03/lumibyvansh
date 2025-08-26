@@ -12,11 +12,12 @@ import {
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { Textarea } from '@/components/ui/textarea';
 import { Button } from '@/components/ui/button';
-import { SendHorizonal, BrainCircuit, ArrowLeft, Sparkles, ChevronDown } from 'lucide-react';
+import { SendHorizonal, BrainCircuit, ArrowLeft, Sparkles } from 'lucide-react';
 import { ChatMessage } from './chat-message';
 import { EmojiSuggestions } from './emoji-suggestions';
 import type { Message } from '@/app/page';
 import { cn } from '@/lib/utils';
+import { AuthButton } from './auth-button';
 
 
 const models = [
@@ -133,8 +134,11 @@ export function ChatPanel({
               </p>
             </div>
           </div>
-          <div className="md:hidden">
-            <ModelSelector />
+          <div className="flex items-center gap-2">
+            <div className="hidden md:block">
+              <ModelSelector />
+            </div>
+            <AuthButton />
           </div>
       </header>
       <ScrollArea className="flex-1" ref={scrollAreaRef}>
@@ -164,7 +168,7 @@ export function ChatPanel({
             className="flex-1 resize-none bg-muted focus-visible:ring-1 focus-visible:ring-ring"
             disabled={isLoading}
           />
-          <div className="hidden md:block">
+          <div className="md:hidden">
             <ModelSelector />
           </div>
           <Button
