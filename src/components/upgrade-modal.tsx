@@ -22,8 +22,8 @@ type UpgradeModalProps = {
 };
 
 // IMPORTANT: Replace with your actual Lemon Squeezy checkout links
-const MONTHLY_CHECKOUT_URL = 'https://lumi.lemonsqueezy.com/buy/a9f9c735-a74e-48f8-a26b-4375b4306385';
-const YEARLY_CHECKOUT_URL = 'https://lumi.lemonsqueezy.com/buy/97626920-c75c-4813-b541-f76a59929835';
+const MONTHLY_CHECKOUT_URL = 'https://vanshrabadiya03.lemonsqueezy.com/buy/fb5ce9cc-a83c-4d0b-85b5-1f76e2e39878';
+const YEARLY_CHECKOUT_URL = 'https://vanshrabadiya03.lemonsqueezy.com/buy/fb5ce9cc-a83c-4d0b-85b5-1f76e2e39878';
 
 export function UpgradeModal({ isOpen, onOpenChange, onSuccessfulUpgrade }: UpgradeModalProps) {
   const { user, signInWithGoogle, loading: authLoading } = useAuth();
